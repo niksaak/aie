@@ -28,7 +28,7 @@ typedef bool (*aie_ArcExtractFun)();
 typedef struct aie_ArcFormat { // Struct with archive format description
   enum aie_ArcFormatKind id; // identifier.
   const char* name; // archiver name
-  const char* extension; // file extension for archive
+  const char** extensions; // pointer to array with file extensions for archive
   enum aie_ArcFormatStatus status;
   unsigned filename_len;
   unsigned drv_version; // version in format 0xYYYYmmdd
