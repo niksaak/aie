@@ -1,5 +1,5 @@
 # AIE VN-TOOLS
-*Artificial (In the name of love) Editor*
+*Artificial (In the name of love) Extractifier*
 
 There shall be rewrite of dsp2003's [*AE - VN Tools*][vn-tools] archive
 manipulator in C.
