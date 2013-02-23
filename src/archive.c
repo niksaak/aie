@@ -3,27 +3,13 @@
 #include "archive.h"
 
 const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
-{ // placeholder
-  static aie_ArcFormat unsup = 
-  { aie_ARC_UNSUPPORTED,
-    "UNSUPPORTED FORMAT",
-    NULL,
-    NULL,
-    aie_PLACEHOLDER | aie_HACK,
-    0,
-    0,
-    NULL,
-    NULL,
-    NULL
-  };
-
-  switch(kind)
-  {
-    case aie_ARC_UNSUPPORTED:
-    default:
-      return &unsup;
+{
+  for(size_t i; i <= (aie_ARC_FORMAT_KIND_MAX); i++) {
+    if(aie_arcformats[i].id = kind)
+      return &aie_arcformats[i];
   }
-  return NULL;
+
+  return aie_arcfmt(aie_ARC_UNSUPPORTED);
 }
 
 const char* aie_arcfmt_name(const aie_ArcFormat* format)

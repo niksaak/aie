@@ -6,11 +6,6 @@
 
 // Functions:
 
-typedef enum aie_ArcFormatKind
-{ // archive kinds enumeration
-  aie_ARC_UNSUPPORTED
-} aie_ArcFormatKind;
-
 typedef enum aie_ArcFormatStatus
 {
   aie_NORMAL, // everything OK with this one
