@@ -17,12 +17,16 @@ else ifeq ($(BUILD), release)
   CFLAGS += -O3
 endif
 
-.PHONY: all clean
+.PHONY: all static_lib dynamic_lib clean
 
-all: $(STATIC_LIB) $(DYNAMIC_LIB)
+all: static_lib dynamic_lib
+
+static_lib: $(STATIC_LIB)
+
+dynamic_lib: $(DYNAMIC_LIB)
 
 $(STATIC_LIB): $(OBJECTS)
-	ar -qcv $@ $?
+	ar -rcuv $@ $?
 
 $(DYNAMIC_LIB): $(OBJECTS)
 	ld -Bshareable -o $@ $?
