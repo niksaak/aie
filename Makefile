@@ -4,12 +4,7 @@ BUILD := debug
 STATIC_LIB := lib/lib$(NAME).a
 DYNAMIC_LIB := lib/lib$(NAME).so
 
-MAIN_SOURCES += $(wildcard src/*.c)
-MAIN_OBJECTS = $(MAIN_SOURCES:.c=.o)
-
-OBJECTS = $(MAIN_OBJECTS)
-
-CFLAGS += -Wall -std=c11 -Isrc/ -fpic
+CFLAGS += -Wall -std=c11 -Iinclude/ -fpic
 
 ifeq ($(BUILD), debug)
   CFLAGS += -g -O0 -DDEBUG_MODE
@@ -17,9 +12,22 @@ else ifeq ($(BUILD), release)
   CFLAGS += -O3
 endif
 
+MAIN_SOURCES += $(wildcard src/*.c)
+MAIN_OBJECTS = $(MAIN_SOURCES:.c=.o)
+FORMATS_SOURCES += $(wildcard src/formats/*.c)
+FORMATS_OBJECTS += $(FORMATS_SOURCES:.c=.o)
+
+OBJECTS = $(FORMATS_OBJECTS) $(MAIN_OBJECTS)
+
 .PHONY: all static_lib dynamic_lib clean
 
 all: static_lib dynamic_lib
+
+debug: clean cleandist
+	$(MAKE) BUILD=debug all
+
+release: clean cleandist
+	$(MAKE) BUILD=release all
 
 static_lib: $(STATIC_LIB)
 
