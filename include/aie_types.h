@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-// Functions:
+#include <aie_archive-kinds.h>
 
 typedef enum aie_ArcFormatStatus
-{
-  aie_NORMAL, // everything OK with this one
+{ // Formatter statuses
+  aie_NORMAL, // everything OK with formatters of this kind
   aie_UNSAFE, // rtfm recomended
   aie_EXPERIMENTAL, // result is not guaranteed
   aie_HACK, // dirty, prolly not for general use
@@ -18,12 +18,15 @@ typedef enum aie_ArcFormatStatus
 } aie_ArcFormatStatus;
 
 typedef struct aie_ArcFile (*aie_ArcOpenFun)(const char* name);
+    // pointer to function that opens archive
 typedef struct aie_ArcFile (*aie_ArcCreateFun)(const char* name);
+    // pointer to function that creates archive
 typedef bool (*aie_ArcExtractFun)();
+    // pointer to function that extracts archive
 
 typedef struct aie_ArcFormat
-{ // Struct with archive format description
-  enum aie_ArcFormatKind id; // identifier.
+{ // Archive format description
+  aie_ArcFormatKind id; // identifier.
   const char* name; // archiver name
   const char* arc_ext; // file extensions for archive, space separated
   const char* meta_ext; // file extensions for metadata, space separated
@@ -70,27 +73,3 @@ typedef struct aie_Archive
   struct aie_ArcFile* files; // files of archive
 } aie_Archive;
 
-// Functions:
-
-extern const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind);
-// get format for archives of kind
-
-extern const char* aie_arcfmt_name(const aie_ArcFormat* format);
-// get format name
-
-extern const char* aie_arcfmt_extensions(const aie_ArcFormat* format);
-// get string, listing acceptable fileextensions for format, space separated.
-// WARNING: returns static string which is modified on each call
-
-extern aie_ArcFormatStatus aie_arcfmt_status(const aie_ArcFormat* format);
-// get status of a formatter
-
-extern const char* aie_arcfmt_statusstr(const aie_ArcFormat* format);
-// get string representation for status of a formatter
-// WARNING: returns static string which is modified on each call
-
-extern size_t aie_arcfmt_namelen(const aie_ArcFormat* format);
-// get maximum filename length in bytes for format
-
-extern uint32_t aie_arcfmt_ver(const aie_ArcFormat* format);
-// get formatter version
