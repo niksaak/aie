@@ -1,4 +1,4 @@
-#include "formats.h"
+#include <aie_formats.h>
 
 const aie_ArcFormat aie_arcformats[] =
 {
@@ -13,4 +13,4 @@ const aie_ArcFormat aie_arcformats[] =
     NULL,
     NULL
   }
-}
+};

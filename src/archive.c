@@ -1,11 +1,13 @@
 #include <string.h>
 
-#include "archive.h"
+#include <aie_types.h>
+#include <aie_formats.h>
+#include <aie_archive.h>
 
 const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
 {
   for(size_t i; i <= (aie_ARC_FORMAT_KIND_MAX); i++) {
-    if(aie_arcformats[i].id = kind)
+    if(aie_arcformats[i].id == kind)
       return &aie_arcformats[i];
   }
 
@@ -37,7 +39,7 @@ aie_ArcFormatStatus aie_arcfmt_status(const aie_ArcFormat* format)
 const char* aie_arcfmt_statusstr(const aie_ArcFormat* format)
 {
   aie_ArcFormatStatus status = aie_arcfmt_status(format);
-  static char ret[512] = {0}
+  static char ret[512] = {0};
   char* str = NULL;
 
   switch(status & 0x7FFFFFFF)
