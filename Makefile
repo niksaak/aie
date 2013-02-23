@@ -19,7 +19,7 @@ FORMATS_OBJECTS += $(FORMATS_SOURCES:.c=.o)
 
 OBJECTS = $(FORMATS_OBJECTS) $(MAIN_OBJECTS)
 
-.PHONY: all static_lib dynamic_lib clean
+.PHONY: all debug release static_lib dynamic_lib clean cleandist
 
 all: static_lib dynamic_lib
 
@@ -33,14 +33,17 @@ static_lib: $(STATIC_LIB)
 
 dynamic_lib: $(DYNAMIC_LIB)
 
-$(STATIC_LIB): $(OBJECTS)
+$(STATIC_LIB): $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
 	ar -rcuv $@ $?
 
-$(DYNAMIC_LIB): $(OBJECTS)
+$(DYNAMIC_LIB): $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
 	ld -Bshareable -o $@ $?
+
+$(FORMATS_OBJECTS): $(MAIN_OBJECTS)
 
 clean:
 	@-$(RM) -v $(OBJECTS)
 
 cleandist:
 	@-$(RM) -v $(STATIC_LIB) $(DYNAMIC_LIB)
+
