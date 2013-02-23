@@ -19,8 +19,10 @@ typedef enum aie_ArcFormatStatus
 
 typedef struct aie_ArcFile (*aie_ArcOpenFun)(const char* name);
     // pointer to function that opens archive
+
 typedef struct aie_ArcFile (*aie_ArcCreateFun)(const char* name);
     // pointer to function that creates archive
+
 typedef bool (*aie_ArcExtractFun)();
     // pointer to function that extracts archive
 
