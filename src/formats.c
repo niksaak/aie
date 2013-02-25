@@ -1,16 +1,24 @@
 #include <aie_formats.h>
 
-const aie_ArcFormat aie_arcformats[] =
+#include "formats/aie_KID_Engine_LiNK.h"
+
+aie_ArcFormat unsupp =
+{ .id = aie_ARC_UNSUPPORTED,
+  .name = "Unsupported format",
+  .subformat_num = 0,
+  .subformat_names = NULL,
+  .arc_ext = NULL,
+  .meta_ext = NULL,
+  .status = aie_PLACEHOLDER | aie_HACK,
+  .filename_len = 0,
+  .drv_version = 0,
+  .open = NULL,
+  .create = NULL,
+  .extract = NULL
+};
+
+const aie_ArcFormat * const aie_arcformats[] =
 {
-  { aie_ARC_UNSUPPORTED,
-    "Unsupported format",
-    NULL,
-    NULL,
-    aie_PLACEHOLDER | aie_HACK,
-    0,
-    0,
-    NULL,
-    NULL,
-    NULL
-  }
+  &KID_Engine_LiNK,
+  &unsupp
 };
