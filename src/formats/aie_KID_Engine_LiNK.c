@@ -31,8 +31,16 @@ aie_Archive* open(const char* name)
   unsigned arc_offset;
 
   if(file == NULL || arcfile == NULL || nodes == NULL || arc == NULL) {
-    fclose(file);
-    return NULL;
+    // FIXME because this is not cute
+    if(file != NULL)
+      fclose(file);
+    if(arcfile != NULL)
+      free(arcfile);
+    if(nodes != NULL)
+      free(nodes);
+    if(arc != NULL)
+      free(arc);
+    return NULL; // TODO: set aie_errno on such kinds of magic-returns
   }
 
   fread(&head, sizeof(head), 1, file);
@@ -55,14 +63,20 @@ aie_Archive* open(const char* name)
     aie_ArcAllocSegment* segment = malloc(sizeof(aie_ArcAllocSegment));
 
     if(node == NULL || segment == NULL) {
+      // FIXME: !cute
       fclose(file);
-      break; // TODO: set aie_errno here
+      if(node != null)
+        free(node);
+      if(segment != NULL)
+        free(segment);
+      break;
     }
 
     fread(&entry, sizeof entry, 1, file);
     node->name = malloc(strlen(entry.fname) + 1);
 
     if(node->name == NULL) {
+      // FIXME: !cute and leaky
       fclose(file);
       break;
     }
@@ -81,7 +95,6 @@ aie_Archive* open(const char* name)
     nodes = node;
   }
 
-  arc = malloc(sizeof(aie_Archive));
   arc->fmt = &KID_Engine_LiNK;
   arc->table = nodes;
   arc->files = arcfile;
