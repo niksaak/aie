@@ -2,4 +2,4 @@
 
 #include <aie_types.h>
 
-extern const aie_ArcFormat aie_arcformats[];
+extern const aie_ArcFormat* const aie_arcformats[];

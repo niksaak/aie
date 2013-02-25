@@ -7,8 +7,8 @@
 const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
 {
   for(size_t i; i <= (aie_ARC_FORMAT_KIND_MAX); i++) {
-    if(aie_arcformats[i].id == kind)
-      return &aie_arcformats[i];
+    if(aie_arcformats[i]->id == kind)
+      return aie_arcformats[i];
   }
 
   return aie_arcfmt(aie_ARC_UNSUPPORTED);
@@ -17,6 +17,13 @@ const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
 const char* aie_arcfmt_name(const aie_ArcFormat* format)
 {
   return format->name;
+}
+
+const char* aie_arcfmt_subformats(const aie_ArcFormat* format)
+{
+  if(format->subformat_names[0] == 0)
+    return NULL;
+  return format->subformat_names;
 }
 
 const char* aie_arcfmt_extensions(const aie_ArcFormat* format)

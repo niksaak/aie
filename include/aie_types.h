@@ -17,19 +17,21 @@ typedef enum aie_ArcFormatStatus
   aie_PLACEHOLDER = 0x80000000 // placeholder, but may be of use
 } aie_ArcFormatStatus;
 
-typedef struct aie_ArcFile (*aie_ArcOpenFun)(const char* name);
+typedef struct aie_Archive* (*aie_ArcOpenFun)(const char* name);
     // pointer to function that opens archive
 
-typedef struct aie_ArcFile (*aie_ArcCreateFun)(const char* name);
+typedef struct aie_Archive* (*aie_ArcCreateFun)(const char* name);
     // pointer to function that creates archive
 
-typedef bool (*aie_ArcExtractFun)();
+typedef bool (*aie_ArcExtractFun)(struct aie_Archive* archive);
     // pointer to function that extracts archive
 
 typedef struct aie_ArcFormat
 { // Archive format description
   aie_ArcFormatKind id; // identifier.
-  const char* name; // archiver name
+  const char* name; // formatter name
+  unsigned subformat_num; // number of subformats
+  const char* subformat_names; // subformat names, colon separated
   const char* arc_ext; // file extensions for archive, space separated
   const char* meta_ext; // file extensions for metadata, space separated
   enum aie_ArcFormatStatus status;
@@ -44,26 +46,26 @@ typedef struct aie_ArcFormat
 
 typedef struct aie_ArcAllocSegment
 { // Archived file segmentation info.
-  size_t offset;
-  size_t size;
+  struct aie_ArcFile* file; // file where segment starts
+  size_t offset; // offset of segment, filewise
+  size_t size; // segment size
   struct aie_ArcAllocSegment* next;
 } aie_ArcAllocSegment;
 
 typedef struct aie_ArcAlloc
 { // Archive allocaton unit
-  char* name; // filename
+  char* name; // unit name
   struct aie_ArcAllocSegment* segments; // file segmentation
   unsigned size; // uncompressed size
   bool compressed;
   bool encrypted;
-
   struct aie_ArcAlloc* next;
 } aie_ArcAlloc;
 
 typedef struct aie_ArcFile
 { // Archive file
   FILE* file; // file descriptor
-  char* name; // filename including path
+  const char* name; // filename including path
   unsigned subtype; // file subtype
   struct aie_ArcFile* next;
 } aie_ArcFile;
