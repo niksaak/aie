@@ -16,7 +16,7 @@ typedef enum aie_ArcFormatStatus
   aie_HACK, // dirty, prolly not for general use
   aie_WRITEONLY, // packing only
   aie_READONLY, // unpacking only
-  aie_PLACEHOLDER = 0x80000000 // placeholder, but may be of use
+  aie_PLACEHOLDER = -1 // placeholder, but may be of use
 } aie_ArcFormatStatus;
 
 typedef struct aie_Archive* (*aie_ArcOpenFun)(const char* name);

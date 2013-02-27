@@ -1,6 +1,5 @@
 #include <string.h>
 
-#include <aie_types.h>
 #include <aie_formats.h>
 #include <aie_archive.h>
 

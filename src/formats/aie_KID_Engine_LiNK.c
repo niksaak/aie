@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include <aie_types.h>
 #include <aie_archive.h>
 
 #include "aie_KID_Engine_LiNK.h"
@@ -24,7 +23,7 @@ aie_Archive* open(const char* name)
 {
   FILE* file = fopen(name, "r");
   aie_ArcFile* arcfile = malloc(sizeof(aie_ArcFile));
-  aie_ArcAlloc* nodes = malloc(sizeof(aie_ArcAlloc));
+  aie_ArcUnit* nodes = malloc(sizeof(aie_ArcUnit));
   aie_Archive* arc = malloc(sizeof(aie_Archive));
   arc_header_t head;
   arc_entry_t entry;
@@ -59,13 +58,13 @@ aie_Archive* open(const char* name)
 
   for(int i; i < head.fcount; i++)
   {
-    aie_ArcAlloc* node = malloc(sizeof(aie_ArcAlloc));
-    aie_ArcAllocSegment* segment = malloc(sizeof(aie_ArcAllocSegment));
+    aie_ArcUnit* node = malloc(sizeof(aie_ArcUnit));
+    aie_ArcUnitSegment* segment = malloc(sizeof(aie_ArcUnitSegment));
 
     if(node == NULL || segment == NULL) {
       // FIXME: !cute
       fclose(file);
-      if(node != null)
+      if(node != NULL)
         free(node);
       if(segment != NULL)
         free(segment);
