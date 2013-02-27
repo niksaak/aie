@@ -3,6 +3,8 @@
 #ifdef DEBUG_MODE
 #define AIE_DEBUG(...) \
   promulgate(aie_PROMUL_DEBUG, __FILE__, __func__, __VA_ARGS__)
+#else
+#define AIE_DEBUG(...)
 #endif
 
 #define AIE_WARN(...) \
