@@ -64,6 +64,13 @@ typedef struct aie_ArcUnit
   struct aie_ArcUnit* next;
 } aie_ArcUnit;
 
+typedef struct aie_ArcUnitTable
+{ // Archive allocation table
+  unsigned unitc; // units count;
+  size_t allocated;
+  aie_ArcUnit unitv[]; // units array;
+} aie_ArcUnitTabble;
+
 typedef struct aie_ArcFile
 { // Archive file
   FILE* file; // file descriptor
@@ -75,36 +82,63 @@ typedef struct aie_ArcFile
 typedef struct aie_Archive
 { // Archive abstraction
   const struct aie_ArcFormat* fmt; // pointer to archive format info
-  struct aie_ArcUnit* table; // unified allocation table for archive
+  struct aie_ArcUnitTable* table; // unified allocation table for archive
   struct aie_ArcFile* files; // files of archive
 } aie_Archive;
 
 // Getters:
 
+/// ArcFormat
+
 extern const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind);
-// get format for archives of kind
+    // get format for archives of kind
 
 extern const char* aie_arcfmt_name(const aie_ArcFormat* format);
-// get format name
+    // get format name
 
 extern const char* aie_arcfmt_subformats(const aie_ArcFormat* format);
-// get string listing subformats of format, or NULL if there is no subformats.
+    // get string listing subformats of format, or NULL 
+    // if there is no subformats.
 
 extern const char* aie_arcfmt_extensions(const aie_ArcFormat* format);
-// get string listing acceptable fileextensions for format, space separated,
-// or NULL if archives of this format can not be recognized by fileextension.
-// WARNING: returns static string which is modified on each call
+    // get string listing acceptable fileextensions for format, space separated,
+    // or NULL if archives of this format can not be recognized 
+    // by fileextension.
+    // WARNING: returns static string which is modified on each call
 
 extern aie_ArcFormatStatus aie_arcfmt_status(const aie_ArcFormat* format);
-// get status of a formatter
+    // get status of a formatter
 
 extern const char* aie_arcfmt_statusstr(const aie_ArcFormat* format);
-// get string representation for status of a formatter
-// WARNING: returns static string which is modified on each call
+    // get string representation for status of a formatter
+    // WARNING: returns static string which is modified on each call
 
 extern size_t aie_arcfmt_namelen(const aie_ArcFormat* format);
-// get maximum filename length in bytes for format
+    // get maximum filename length in bytes for format
 
 extern uint32_t aie_arcfmt_ver(const aie_ArcFormat* format);
-// get formatter version
+    // get formatter version
+
+/// Archive
+
+extern const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive);
+    // get archive format
+
+extern aie_ArcUnitTable* aie_arch_table(const aie_Archive* hive);
+    // get archive allocation table
+
+extern aie_ArcFile* aie_arch_parts(const aie_Archive* hive);
+    // get list of archive parts
+
+/// ArcUnit and friends
+
+extern const aie_ArcUnit*
+aie_arcunit_get(aie_Archive* hive, size_t index);
+    // get pointer to Unit, indexed at 'index' at 'hive's unittable.
+    // returns NULL if there is no unit at this index
+
+extern size_t aie_arcunit_push(aie_Archive* hive, aie_ArcUnit unit);
+    // push 'unit' to 'hive's unittable, return index of pushed 'unit'
+    // possible TODO: move it to internal header not visible from outside
+
 
