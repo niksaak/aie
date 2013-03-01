@@ -19,6 +19,12 @@ typedef enum aie_ArcFormatStatus
   aie_PLACEHOLDER = -1 // placeholder, but may be of use
 } aie_ArcFormatStatus;
 
+typedef enum aie_ArcUnitFlags
+{
+  aie_COMPRESSED = 1,
+  aie_ENCRYPTED = 2
+} aie_ArcUnitFlags;
+
 typedef struct aie_Archive* (*aie_ArcOpenFun)(const char* name);
     // pointer to function that opens archive
 
@@ -59,9 +65,7 @@ typedef struct aie_ArcUnit
   char* name; // unit name
   struct aie_ArcUnitSegment* segments; // file segmentation
   unsigned size; // uncompressed size
-  bool compressed;
-  bool encrypted;
-  struct aie_ArcUnit* next;
+  aie_ArcUnitFlags flags; // unit flags, ORed
 } aie_ArcUnit;
 
 typedef struct aie_ArcUnitTable
@@ -69,7 +73,7 @@ typedef struct aie_ArcUnitTable
   unsigned unitc; // units count;
   size_t allocated;
   aie_ArcUnit unitv[]; // units array;
-} aie_ArcUnitTabble;
+} aie_ArcUnitTable;
 
 typedef struct aie_ArcFile
 { // Archive file
@@ -101,9 +105,9 @@ extern const char* aie_arcfmt_subformats(const aie_ArcFormat* format);
     // if there is no subformats.
 
 extern const char* aie_arcfmt_extensions(const aie_ArcFormat* format);
-    // get string listing acceptable fileextensions for format, space separated,
-    // or NULL if archives of this format can not be recognized 
-    // by fileextension.
+    // get string listing acceptable fileextensions for 'format' 
+    // space separated, or NULL if archives of this format 
+    // can not be recognized by fileextension.
     // WARNING: returns static string which is modified on each call
 
 extern aie_ArcFormatStatus aie_arcfmt_status(const aie_ArcFormat* format);
@@ -124,21 +128,37 @@ extern uint32_t aie_arcfmt_ver(const aie_ArcFormat* format);
 extern const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive);
     // get archive format
 
-extern aie_ArcUnitTable* aie_arch_table(const aie_Archive* hive);
+extern aie_ArcUnitTable* aie_arch_table(aie_Archive* hive);
     // get archive allocation table
 
-extern aie_ArcFile* aie_arch_parts(const aie_Archive* hive);
+extern aie_ArcFile* aie_arch_parts(aie_Archive* hive);
     // get list of archive parts
 
 /// ArcUnit and friends
 
-extern const aie_ArcUnit*
-aie_arcunit_get(aie_Archive* hive, size_t index);
-    // get pointer to Unit, indexed at 'index' at 'hive's unittable.
+extern aie_ArcUnit*
+aie_arcunit_get(aie_ArcUnitTable* table, size_t index);
+    // get pointer to Unit indexed at 'index' at 'hive's unittable.
     // returns NULL if there is no unit at this index
 
-extern size_t aie_arcunit_push(aie_Archive* hive, aie_ArcUnit unit);
+extern size_t aie_arcunit_push(aie_ArcUnit unit, aie_ArcUnitTable** tableptr);
     // push 'unit' to 'hive's unittable, return index of pushed 'unit'
     // possible TODO: move it to internal header not visible from outside
+
+extern const char* aie_arcunit_name(const aie_ArcUnit* unit);
+    // return namestring of 'unit'
+
+extern unsigned aie_arcunit_uncompressed_size(const aie_ArcUnit* unit);
+    // return size of uncompressed 'unit', if available
+
+extern unsigned aie_arcunit_compressed_size(const aie_ArcUnit* unit);
+    // return size of 'unit' in archive
+
+extern unsigned aie_arcunit_segcount(const aie_ArcUnit* unit);
+    // return number of segments of 'unit'
+
+extern bool
+aie_arcunit_getflags(const aie_ArcUnit* unit, aie_ArcUnitFlags flags);
+    // return true if flags is set
 
 

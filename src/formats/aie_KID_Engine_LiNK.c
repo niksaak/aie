@@ -20,7 +20,7 @@ typedef struct arc_entry_t {
 } arc_entry_t;
 
 aie_Archive* open(const char* name)
-{
+{ // FIXME by rewriting everything when the time come
   FILE* file = fopen(name, "r");
   aie_ArcFile* arcfile = malloc(sizeof(aie_ArcFile));
   aie_ArcUnit* nodes = malloc(sizeof(aie_ArcUnit));
@@ -56,7 +56,7 @@ aie_Archive* open(const char* name)
   arcfile->subtype = 0;
   arcfile->next = NULL;
 
-  for(int i; i < head.fcount; i++)
+  for(int i = 0; i < head.fcount; i++)
   {
     aie_ArcUnit* node = malloc(sizeof(aie_ArcUnit));
     aie_ArcUnitSegment* segment = malloc(sizeof(aie_ArcUnitSegment));
@@ -88,14 +88,11 @@ aie_Archive* open(const char* name)
     strncpy(node->name, entry.fname, sizeof entry.fname);
     node->segments = segment;
     node->size = segment->size;
-    node->compressed = false;
-    node->encrypted = false;
-    node->next = nodes;
+    node->flags = 0;
     nodes = node;
   }
 
   arc->fmt = &KID_Engine_LiNK;
-  arc->table = nodes;
   arc->files = arcfile;
 
   return arc;
@@ -121,7 +118,7 @@ aie_ArcFormat KID_Engine_LiNK = // format description
   .create           = &create,
   .extract          = &extract,
 };
-// C standard requires static structs to be initially filled with zeros,
+// C standard requires static structs to be initially filled with zeroes,
 // so we actually can to omit the fields with NULLs/0s, but better
 // make sure, in case of dumb compiler
 

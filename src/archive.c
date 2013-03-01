@@ -1,11 +1,15 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include <aie_formats.h>
 #include <aie_archive.h>
+#include <aie_util.h>
+
+// ArcFormat
 
 const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
 {
-  for(size_t i; i <= (aie_ARC_FORMAT_KIND_MAX); i++) {
+  for(size_t i = 0; i <= (aie_ARC_FORMAT_KIND_MAX); i++) {
     if(aie_arcformats[i]->id == kind)
       return aie_arcformats[i];
   }
@@ -85,4 +89,81 @@ size_t aie_arcfmt_namelen(const aie_ArcFormat* format)
 uint32_t aie_arcfmt_ver(const aie_ArcFormat* format)
 {
   return format->drv_version;
+}
+
+// Archive
+
+const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive)
+{
+  return hive->fmt;
+}
+
+aie_ArcUnitTable* aie_arch_table(aie_Archive* hive)
+{
+  return hive->table;
+}
+
+aie_ArcFile* aie_arch_parts(aie_Archive* hive)
+{
+  return hive->files;
+}
+
+// ArcUnit and friends
+
+aie_ArcUnit* aie_arcunit_get(aie_ArcUnitTable* table, size_t index)
+{
+  if(index >= table->unitc)
+    return NULL;
+  return &table->unitv[index];
+}
+
+size_t aie_arcunit_push(aie_ArcUnit unit, aie_ArcUnitTable** tableptr)
+{ // FIXME by using aie_realloc
+  aie_ArcUnitTable* table = *tableptr;
+  if((table->unitc + 1) > table->allocated)
+    tableptr = realloc (
+        table->unitv, sizeof(aie_ArcUnitTable) + aie_nextfib(table->allocated)
+    );
+  table->unitv[table->unitc] = unit;
+
+  return table->unitc++;
+}
+
+const char* aie_arcunit_name(const aie_ArcUnit* unit)
+{
+  return unit->name;
+}
+
+unsigned aie_arcunit_uncompressed_size(const aie_ArcUnit* unit)
+{
+  return unit->size;
+}
+
+static unsigned impl_arcunit_segments_size_sum(aie_ArcUnitSegment* seg)
+{
+  if(seg) {
+    return seg->size + impl_arcunit_segments_size_sum(seg->next);
+  }
+
+  return 0;
+}
+
+unsigned aie_arcunit_compressed_size(const aie_ArcUnit* unit)
+{
+  return impl_arcunit_segments_size_sum(unit->segments);
+}
+
+unsigned aie_arcunit_segcount(const aie_ArcUnit* unit)
+{
+  unsigned i = 0;
+
+  for(aie_ArcUnitSegment* seg = unit->segments; seg != NULL; seg = seg->next)
+    i++;
+
+  return i;
+}
+
+bool aie_arcunit_getflags(const aie_ArcUnit* unit, aie_ArcUnitFlags flags)
+{
+  return (unit->flags & flags) == flags;
 }
