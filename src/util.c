@@ -3,8 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <aie_util.h>
+
+#include "fibonacci.h"
 
 void promulgate(aie_PromulgationLevel level, const char* file, const char* func,
     const char* promulgation, ...)
@@ -13,7 +16,7 @@ void promulgate(aie_PromulgationLevel level, const char* file, const char* func,
   static char warning_str[] = "WARNING";
   static char error_str[] = "ERROR";
   static char panic_str[] = "PANIC";
-  char* str;
+  char* str = NULL;
   va_list va_args;
 
   switch(level)
@@ -80,3 +83,45 @@ void aie_free(void** pointer)
   *pointer = NULL;
 }
 
+long aie_fib(int n)
+{ // TODO: possibly make this inlined
+  if(n > 0) {
+    if(n < 39) {
+      return aie_fibnums[n];
+    } else 
+      return aie_fib(n - 1) + aie_fib(n - 2);
+  }
+
+  return 0;
+}
+
+long aie_nextfib(long n)
+{
+  unsigned i = 0;
+
+  while(++i) {
+    long f = aie_fib(i);
+
+    if(f > n)
+      return f;
+  }
+  
+  return -1;
+}
+
+long aie_prevfib(long n)
+{
+  unsigned i = 0;
+  long prev = 0;
+
+  while(++i) {
+    long f = aie_fib(i);
+
+    if(f > n)
+      return prev;
+
+    prev = f;
+  }
+
+  return -1;
+}

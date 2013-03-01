@@ -41,3 +41,12 @@ extern int ran_domo(int min, int max);
 extern void* aie_malloc(size_t size);
 
 extern void aie_free(void** pointer);
+
+extern long aie_fib(int n);
+// return n'th number in fibonacci sequence
+
+extern long aie_nextfib(long n);
+// return fibonacci number larger than n
+
+extern long aie_prevfib(long n);
+// return fibonacci number lesser than n
