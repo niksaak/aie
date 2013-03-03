@@ -2,8 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <errno.h>
 
 #include <aie_archive.h>
+#include <aie_util.h>
 
 #include "aie_KID_Engine_LiNK.h"
 
@@ -20,82 +22,53 @@ typedef struct arc_entry_t {
 } arc_entry_t;
 
 aie_Archive* open(const char* name)
-{ // FIXME by rewriting everything when the time come
+{
   FILE* file = fopen(name, "r");
-  aie_ArcFile* arcfile = malloc(sizeof(aie_ArcFile));
-  aie_ArcUnit* nodes = malloc(sizeof(aie_ArcUnit));
-  aie_Archive* arc = malloc(sizeof(aie_Archive));
-  arc_header_t head;
-  arc_entry_t entry;
-  unsigned arc_offset;
+  aie_Archive* ar = aie_mkarchive();
+  struct arc_header_t header = {{0}};
 
-  if(file == NULL || arcfile == NULL || nodes == NULL || arc == NULL) {
-    // FIXME because this is not cute
-    if(file != NULL)
-      fclose(file);
-    if(arcfile != NULL)
-      free(arcfile);
-    if(nodes != NULL)
-      free(nodes);
-    if(arc != NULL)
-      free(arc);
-    return NULL; // TODO: set aie_errno on such kinds of magic-returns
+  errno = 0;
+
+  if(file == NULL) {
+    AIE_ERROR("Unable to open file at %s: %s", name, strerror(errno));
+    return NULL;
   }
 
-  fread(&head, sizeof(head), 1, file);
+  fread(&header, sizeof header, 1, file);
 
-  if(strncmp(head.magic, "LNK", 4)) {
+  if(strncmp(header.magic, "LNK", 4)) {
+    AIE_DEBUG("file %s is not of format \"KID Engine LiNK\"");
     fclose(file);
     return NULL;
   }
 
-  arc_offset = head.fcount * sizeof entry + sizeof head;
-
-  arcfile->file = file;
-  arcfile->name = name;
-  arcfile->subtype = 0;
-  arcfile->next = NULL;
-
-  for(int i = 0; i < head.fcount; i++)
   {
-    aie_ArcUnit* node = malloc(sizeof(aie_ArcUnit));
-    aie_ArcUnitSegment* segment = malloc(sizeof(aie_ArcUnitSegment));
+    aie_ArcFile* arcfile = aie_mkarcfile();
+    aie_ArcUnitTable* table = aie_mkarctable();
+    arc_entry_t entry = {0};
+    unsigned arc_offset = header.fcount * sizeof entry + sizeof header;
 
-    if(node == NULL || segment == NULL) {
-      // FIXME: !cute
-      fclose(file);
-      if(node != NULL)
-        free(node);
-      if(segment != NULL)
-        free(segment);
-      break;
+    arcfile->name = name;
+    arcfile->file = file;
+
+    for(size_t i = 0; i < header.fcount; i++) {
+      aie_ArcUnitSegment* seg = aie_mkarcunitseg();
+      aie_ArcUnit unit = {entry.fname, seg, entry.fsize2, 0};
+
+      fread(&entry, sizeof entry, 1, file);
+      seg->file = arcfile;
+      seg->offset = entry.offset + arc_offset;
+      seg->size = entry.fsize2 / 2;
+      seg->next = NULL;
+      aie_arcunit_push(unit, &table);
     }
 
-    fread(&entry, sizeof entry, 1, file);
-    node->name = malloc(strlen(entry.fname) + 1);
-
-    if(node->name == NULL) {
-      // FIXME: !cute and leaky
-      fclose(file);
-      break;
-    }
-
-    segment->file = arcfile;
-    segment->offset = entry.offset + arc_offset;
-    segment->size = entry.fsize2 / 2;
-    segment->next = NULL;
-    memset(node->name, 0, sizeof entry.fname);
-    strncpy(node->name, entry.fname, sizeof entry.fname);
-    node->segments = segment;
-    node->size = segment->size;
-    node->flags = 0;
-    nodes = node;
+    ar->fmt = &KID_Engine_LiNK;
+    ar->table = table;
+    ar->files = arcfile;
   }
 
-  arc->fmt = &KID_Engine_LiNK;
-  arc->files = arcfile;
-
-  return arc;
+  return ar;
 }
 
 aie_Archive* create(const char* name) { return NULL; }
