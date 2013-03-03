@@ -14,7 +14,7 @@
   promulgate(aie_PROMUL_ERROR, __FILE__, __func__, __VA_ARGS__)
 
 #define AIE_PANIC(...) \
-  promulgate(aie_PROMUL_CRITICAL, __FILE__, __func__, __VA_ARGS__)
+  promulgate(aie_PROMUL_PANIC, __FILE__, __func__, __VA_ARGS__)
 
 #define AIE_PTRCALL(fun, ...) \
   fun == NULL ? NULL : fun(__VA_ARGS__)
@@ -39,14 +39,20 @@ extern int ran_domo(int min, int max);
     // get pseudorandom number in range
 
 extern void* aie_malloc(size_t size);
+    // convenient wrapper around malloc()
+
+extern void* aie_realloc(void* pointer, size_t size);
+    // convenient wrapper around realloc()
 
 extern void aie_free(void** pointer);
+    // do free(*pointer) and set *pointer to NULL
 
 extern long aie_fib(int n);
-// return n'th number in fibonacci sequence
+    // return n'th number in fibonacci sequence
 
 extern long aie_nextfib(long n);
-// return fibonacci number larger than n
+    // return fibonacci number larger than n
 
 extern long aie_prevfib(long n);
-// return fibonacci number lesser than n
+    // return fibonacci number lesser than n
+

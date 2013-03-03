@@ -70,11 +70,24 @@ void* aie_malloc(size_t size)
   errno = 0;
   ptr = malloc(size);
 
-  if(ptr == NULL) {
-    AIE_ERROR("Unable to malloc %z bytes, errno: %s", size, strerror(errno));
+  if(ptr == NULL || errno) {
+    AIE_PANIC("Unable to malloc %z bytes, errno: %s", size, strerror(errno));
   }
 
   return ptr;
+}
+
+void* aie_realloc(void* pointer, size_t size)
+{
+  errno = 0;
+  pointer = realloc(pointer, size);
+
+  if(pointer == NULL || errno) {
+    AIE_PANIC("Unable to reallocate %z bytes, errno: %s",
+        size, strerror(errno));
+  }
+
+  return pointer;
 }
 
 void aie_free(void** pointer)
@@ -125,3 +138,4 @@ long aie_prevfib(long n)
 
   return -1;
 }
+
