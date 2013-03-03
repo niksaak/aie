@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <aie_archive-kinds.h>
+#include <aie_util.h>
 
 // Types:
 
@@ -79,7 +80,7 @@ typedef struct aie_ArcFile
 { // Archive file
   FILE* file; // file descriptor
   const char* name; // filename including path
-  unsigned subtype; // file subtype
+  unsigned role; // file role
   struct aie_ArcFile* next;
 } aie_ArcFile;
 
@@ -89,6 +90,22 @@ typedef struct aie_Archive
   struct aie_ArcUnitTable* table; // unified allocation table for archive
   struct aie_ArcFile* files; // files of archive
 } aie_Archive;
+
+// Allocators:
+
+/// Archive
+
+extern aie_Archive* aie_mkarchive(void);
+    // allocates aie_Archive struct
+
+extern aie_ArcFile* aie_mkarcfile(void);
+    // allocates aie_ArcFile struct
+
+extern aie_ArcUnitTable* aie_mkarctable(void);
+    // allocates aie_ArcFileTable struct
+
+extern aie_ArcUnitSegment* aie_mkarcunitseg(void);
+    // allocates aie_AtcUnitSegment struct
 
 // Getters:
 
@@ -160,5 +177,4 @@ extern unsigned aie_arcunit_segcount(const aie_ArcUnit* unit);
 extern bool
 aie_arcunit_getflags(const aie_ArcUnit* unit, aie_ArcUnitFlags flags);
     // return true if flags is set
-
 
