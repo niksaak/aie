@@ -118,15 +118,17 @@ aie_ArcUnit* aie_arcunit_get(aie_ArcUnitTable* table, size_t index)
 }
 
 size_t aie_arcunit_push(aie_ArcUnit unit, aie_ArcUnitTable** tableptr)
-{ // FIXME by using aie_realloc
+{
   aie_ArcUnitTable* table = *tableptr;
-  if((table->unitc + 1) > table->allocated)
-    tableptr = realloc (
-        table->unitv, sizeof(aie_ArcUnitTable) + aie_nextfib(table->allocated)
-    );
-  table->unitv[table->unitc] = unit;
 
-  return table->unitc++;
+  if((table->unitc + 1) * sizeof unit > table->allocated) {
+    unsigned fib = aie_nextfib(table->allocated);
+
+    *tableptr = aie_realloc(table,
+        sizeof aie_ArcUnitTable + fib - fib % sizeof unit);
+  }
+
+  return (*tableptr)->unitc++;
 }
 
 const char* aie_arcunit_name(const aie_ArcUnit* unit)
