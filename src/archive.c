@@ -93,6 +93,51 @@ uint32_t aie_arcfmt_ver(const aie_ArcFormat* format)
 
 // Archive
 
+aie_Archive* aie_aloarchive(void)
+{
+  aie_Archive* arc = aie_alloc(sizeof (aie_Archive));
+
+  arc->fmt = aie_ARC_UNSUPPORTED;
+  arc->table = NULL;
+  arc->files = NULL;
+
+  return arc;
+}
+
+aie_Archive* aie_mkarchive(aie_ArcFormatKind kind,
+                           aie_ArcUnitTable table,
+                           aie_ArcFile* files)
+{
+  aie_Archive arc = aie_alloc(sizeof (aie_Archive));
+
+  arc->fmt = aie_arcfmt(kind);
+  arc->table = table;
+  arc->files = files;
+
+  return arc;
+}
+
+void aie_frearchive(aie_Archive* archive)
+{
+  if(archive != NULL) {
+    aie_free(archive);
+  }
+  return;
+}
+
+bool aie_kmarchive(aie_Archive* archive)
+{
+  if(archive == NULL) {
+    return false;
+  }
+
+  aie_kmarctable(archive->table);
+  aie_kmarcfile(archive->file);
+  aie_frearchive(archive);
+
+  return true;
+}
+
 const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive)
 {
   return hive->fmt;

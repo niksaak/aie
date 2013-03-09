@@ -109,6 +109,7 @@ extern void aie_frearchive(aie_Archive* archive);
 
 extern bool aie_kmarchive(aie_Archive* archive);
     // kill murderously 'archive' and those of its fields that need killing
+    // TODO: think about making this to return void
 
 /// ArcFile
 
