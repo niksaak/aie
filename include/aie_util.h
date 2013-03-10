@@ -16,7 +16,7 @@
 #define AIE_PANIC(...) \
   promulgate(aie_PROMUL_PANIC, __FILE__, __func__, __VA_ARGS__)
 
-#define AIE_PTRCALL(fun, ...) \
+#define AIE_FUNCALL(fun, ...) \
   fun == NULL ? NULL : fun(__VA_ARGS__)
 
 #define AIE_FREE(ptr) \
