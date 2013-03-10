@@ -9,55 +9,17 @@
 
 // Types:
 
-typedef enum aie_ArcFormatStatus
-{ // Formatter statuses
-  aie_NORMAL, // everything OK with formatters of this kind
-  aie_UNSAFE, // rtfm recomended
-  aie_EXPERIMENTAL, // result is not guaranteed
-  aie_HACK, // dirty, prolly not for general use
-  aie_WRITEONLY, // packing only
-  aie_READONLY, // unpacking only
-  aie_PLACEHOLDER = -1 // placeholder, but may be of use
-} aie_ArcFormatStatus;
-
 typedef enum aie_ArcUnitFlags
 {
   aie_COMPRESSED = 1,
   aie_ENCRYPTED = 2
 } aie_ArcUnitFlags;
 
-typedef struct aie_Archive* (*aie_ArcOpenFun)(const char* name);
-    // pointer to function that opens archive
-
-typedef struct aie_Archive* (*aie_ArcCreateFun)(const char* name);
-    // pointer to function that creates archive
-
-typedef bool (*aie_ArcExtractFun)(struct aie_Archive* archive);
-    // pointer to function that extracts archive
-
-typedef struct aie_ArcFormat
-{ // Archive format description
-  aie_ArcFormatKind id;         // identifier.
-  const char* name;             // formatter name
-  unsigned subformat_num;       // number of subformats
-  const char* subformat_names;  // subformat names, colon separated
-  const char* arc_ext;          // file extensions for archive, space separated
-  const char* meta_ext;         // file extensions for metadata
-  enum aie_ArcFormatStatus status;
-  size_t filename_len;          // max filename len
-  uint32_t drv_version;         // version in format 0xYYYYmmdd
-
-  aie_ArcOpenFun open;
-  aie_ArcCreateFun create;
-  aie_ArcExtractFun extract;
-
-} aie_ArcFormat;
-
 typedef struct aie_ArcUnitSegment
-{ // Archived file segmentation info.
+{ // Represents segment of archived file, can form linked list
   struct aie_ArcFile* file;     // file where segment starts
-  size_t offset;                // offset of segment, filewise
-  size_t size;                  // segment size
+  unsigned offset;              // offset of segment, filewise
+  unsigned size;                // segment size
   struct aie_ArcUnitSegment* next;
 } aie_ArcUnitSegment;
 
@@ -77,7 +39,7 @@ typedef struct aie_ArcUnitTable
 } aie_ArcUnitTable;
 
 typedef struct aie_ArcFile
-{ // Archive file
+{ // Represents part of archive, can form linked list
   FILE* file;                   // file descriptor
   char* name;                   // filename including path
   int role;                     // file role
@@ -85,12 +47,13 @@ typedef struct aie_ArcFile
 } aie_ArcFile;
 
 typedef struct aie_Archive
-{ // Archive abstraction
+{ // Abstraction for archives
   const struct aie_ArcFormat* fmt;  // pointer to archive format info
   struct aie_ArcUnitTable* table;   // unified allocation table for archive
   struct aie_ArcFile* files;        // files of archive
 } aie_Archive;
 
+/* TODO: REDO
 // Allocators:
 
 /// Archive
@@ -107,7 +70,7 @@ aie_mkarchive(aie_ArcFormatKind kind,
 extern void aie_frearchive(aie_Archive* archive);
     // free 'archive'
 
-extern bool aie_kmarchive(aie_Archive* archive);
+extern int aie_kmarchive(aie_Archive* archive);
     // kill murderously 'archive' and those of its fields that need killing
     // TODO: think about making this to return void
 
@@ -126,7 +89,7 @@ aie_mkarcfile(FILE* file,
 extern void aie_frearcfile(aie_ArcFile* archive);
     // free 'archive'
 
-extern bool aie_kmarchive(aie_ArcFile* arcfile);
+extern int aie_kmarchive(aie_ArcFile* arcfile);
     // kill murderously 'arcfile' and those of its fields that need killing
 
 /// ArcUnitTable
@@ -141,26 +104,16 @@ aie_mkarctable(unsigned units_count);
 extern void aie_frearctable(aie_ArcTable* table);
     // free 'table'
 
-extern bool aie_kmarctable(aie_ArcUnitTable* table);
+extern int aie_kmarctable(aie_ArcUnitTable* table);
     // kill murderously 'table' and those of its fields that need killing
 
 /// ArcUnit
 
-extern aie_ArcUnit* aie_aloarcunit(void);
-    // allocate ArcUnit and set its fields to default values
-
-extern aie_ArcUnit*
-aie_mkarcunit(char* name,
-              aie_ArcUnitSegment* segments,
-              unsigned size,
-              aie_ArcUnitFlags flags);
-    // allocate ArcUnit and set its fields to corresponding args
-
-extern void aie_frearcunit(aie_ArcUnit* unit);
-    // free 'unit'
-
-extern bool aie_kmarcunit(aie_ArcUnit* unit);
-    // kill murderously 'unit' and those of its fields that need killing
+extern aie_ArcUnit
+aie_arcunit(char* name,
+            aie_ArcUnitSegment* segments,
+            unsigned size,
+            aie_ArcUnitFlags);
 
 /// ArcUnitSegment
 
@@ -174,46 +127,22 @@ aie_mkarcunit_seg(aie_ArcFile* file,
                      aie_ArcUnitSegment* next);
     // allocate ArcUnitSegment and set its fields to corresponding arguments
 
-extern bool aie_frearcunit_seg(aie_ArcUnitSegment* segment);
+extern void aie_frearcunit_seg(aie_ArcUnitSegment* segment);
     // free 'segment'
 
-extern void aie_kmarcunit_seg(aie_ArcUnitSegment* segment);
+extern int aie_kmarcunit_seg(aie_ArcUnitSegment* segment);
     // kill murderously 'segment' and those of its fields that need killing
+*/
 
-// Getters:
+// Archive
 
-/// ArcFormat
+extern aie_Archive* aie_mkarchive(aie_ArcFormatKind kind,
+                                  aie_ArcUnitTable* table,
+                                  aie_ArcFile* files);
+    // make archive
 
-extern const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind);
-    // get format for archives of kind
-
-extern const char* aie_arcfmt_name(const aie_ArcFormat* format);
-    // get format name
-
-extern const char* aie_arcfmt_subformats(const aie_ArcFormat* format);
-    // get string listing subformats of format, or NULL 
-    // if there is no subformats.
-
-extern const char* aie_arcfmt_extensions(const aie_ArcFormat* format);
-    // get string listing acceptable fileextensions for 'format' 
-    // space separated, or NULL if archives of this format 
-    // can not be recognized by fileextension.
-    // WARNING: returns static string which is modified on each call
-
-extern aie_ArcFormatStatus aie_arcfmt_status(const aie_ArcFormat* format);
-    // get status of a formatter
-
-extern const char* aie_arcfmt_statusstr(const aie_ArcFormat* format);
-    // get string representation for status of a formatter
-    // WARNING: returns static string which is modified on each call
-
-extern size_t aie_arcfmt_namelen(const aie_ArcFormat* format);
-    // get maximum filename length in bytes for format
-
-extern uint32_t aie_arcfmt_ver(const aie_ArcFormat* format);
-    // get formatter version
-
-/// Archive
+extern int aie_kmarchive(aie_Archive* archive);
+    // deallocate archive and its contents
 
 extern const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive);
     // get archive format
@@ -224,30 +153,68 @@ extern aie_ArcUnitTable* aie_arch_table(aie_Archive* hive);
 extern aie_ArcFile* aie_arch_parts(aie_Archive* hive);
     // get list of archive parts
 
-/// ArcUnit and friends
+// ArcUnitTable
 
-extern aie_ArcUnit*
-aie_arcunit_get(aie_ArcUnitTable* table, size_t index);
-    // get pointer to Unit indexed at 'index' at 'hive's unittable.
-    // returns NULL if there is no unit at this index
+extern aie_ArcUnitTable* aie_mkarctable(unsigned units_count);
+    // make ArcTable with place for 'units_count' units preallocated,
+    // or default amount if 'units_count' == 0
 
-extern size_t aie_arcunit_push(aie_ArcUnit unit, aie_ArcUnitTable** tableptr);
-    // push 'unit' to 'hive's unittable, return index of pushed 'unit'
-    // possible TODO: move it to internal header not visible from outside
+extern int aie_kmarctable(aie_ArcUnitTable* table);
+    // kill table and its units
 
-extern const char* aie_arcunit_name(const aie_ArcUnit* unit);
+extern aie_ArcUnit* aie_arctable_get(aie_ArcUnitTable* table, size_t index);
+    // get ArcUnit placed at 'index' in table.
+    // returns NULL if index is too big
+
+extern aie_ArcUnit* aie_arctable_unitv(aie_ArcUnitTable* table);
+    // get units array from 'table'
+    // same as aie_arctable_get(table, 0) for now
+
+extern unsigned aie_arctable_push(aie_ArcUnitTable* table, aie_ArcUnit unit);
+    // push 'unit' to table, return 'unit's index in table
+
+// ArcUnit
+
+extern aie_ArcUnit aie_arcunit(char* name,
+                               aie_ArcUnitSegment* segments,
+                               unsigned size,
+                               aie_ArcUnitFlags flags);
+    // create unit
+
+extern const char* aie_arcunit_name(aie_ArcUnit* unit);
     // return namestring of 'unit'
 
-extern unsigned aie_arcunit_uncompressed_size(const aie_ArcUnit* unit);
+extern unsigned aie_arcunit_uncompressed_size(aie_ArcUnit* unit);
     // return size of uncompressed 'unit', if available
 
-extern unsigned aie_arcunit_compressed_size(const aie_ArcUnit* unit);
+extern unsigned aie_arcunit_compressed_size(aie_ArcUnit* unit);
     // return size of 'unit' in archive
 
-extern unsigned aie_arcunit_segcount(const aie_ArcUnit* unit);
-    // return number of segments of 'unit'
+extern aie_ArcUnitSegment* aie_arcunit_segments(aie_ArcUnit* unit);
+    // get segments list from 'unit'
 
 extern bool
 aie_arcunit_getflags(const aie_ArcUnit* unit, aie_ArcUnitFlags flags);
     // return true if flags is set
 
+// ArcUnitSegment
+
+extern aie_ArcUnitSegment* aie_arcsegment_push(aie_ArcFile* file,
+                                               unsigned offset,
+                                               unsigned size,
+                                               aie_ArcUnitSegment** list);
+    // push new ArcUnitSegment to list
+
+extern int aie_arcsegment_destroy(aie_ArcUnitSegment** list);
+    // destroy segments list
+
+// ArcFile
+
+extern aie_ArcFile* aie_arcfile_push(FILE* file,
+                                     char* name,
+                                     unsigned role,
+                                     aie_ArcFile** list);
+    // push new ArcFile to list
+
+extern int aie_arcfile_destroy(aie_ArcFile** list);
+    // destroy archive parts list
