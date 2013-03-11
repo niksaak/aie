@@ -53,87 +53,6 @@ typedef struct aie_Archive
   struct aie_ArcFile* files;        // files of archive
 } aie_Archive;
 
-/* TODO: REDO
-// Allocators:
-
-/// Archive
-
-extern aie_Archive* aie_aloarchive(void);
-    // allocate Archive and set its fields to default values
-
-extern aie_Archive*
-aie_mkarchive(aie_ArcFormatKind kind, 
-              aie_ArcUnitTable* table,
-              aie_ArcFile* files);
-    // allocate Archive and set its fields to corresponding args
-
-extern void aie_frearchive(aie_Archive* archive);
-    // free 'archive'
-
-extern int aie_kmarchive(aie_Archive* archive);
-    // kill murderously 'archive' and those of its fields that need killing
-    // TODO: think about making this to return void
-
-/// ArcFile
-
-extern aie_ArcFile* aie_aloarcfile(void);
-    // allocate ArcFile
-
-extern aie_ArcFile*
-aie_mkarcfile(FILE* file,
-              char* name,
-              int role,
-              aie_ArcFile* next);
-    // allocate ArcFile and set its fields to corresponding args
-
-extern void aie_frearcfile(aie_ArcFile* archive);
-    // free 'archive'
-
-extern int aie_kmarchive(aie_ArcFile* arcfile);
-    // kill murderously 'arcfile' and those of its fields that need killing
-
-/// ArcUnitTable
-
-extern aie_ArcUnitTable* aie_aloarctable(void);
-    // allocate ArcUnitTable with default amount of place for units
-
-extern aie_ArcUnitTable*
-aie_mkarctable(unsigned units_count);
-    // allocate ArcUnitTable with space for 'units_count' units
-
-extern void aie_frearctable(aie_ArcTable* table);
-    // free 'table'
-
-extern int aie_kmarctable(aie_ArcUnitTable* table);
-    // kill murderously 'table' and those of its fields that need killing
-
-/// ArcUnit
-
-extern aie_ArcUnit
-aie_arcunit(char* name,
-            aie_ArcUnitSegment* segments,
-            unsigned size,
-            aie_ArcUnitFlags);
-
-/// ArcUnitSegment
-
-extern aie_ArcUnitSegment* aie_aloarcunit_seg(void);
-    // allocate ArcUnitSegment and set its fields to default values
-
-extern aie_ArcUnitSegment*
-aie_mkarcunit_seg(aie_ArcFile* file,
-                     size_t offset,
-                     size_t size,
-                     aie_ArcUnitSegment* next);
-    // allocate ArcUnitSegment and set its fields to corresponding arguments
-
-extern void aie_frearcunit_seg(aie_ArcUnitSegment* segment);
-    // free 'segment'
-
-extern int aie_kmarcunit_seg(aie_ArcUnitSegment* segment);
-    // kill murderously 'segment' and those of its fields that need killing
-*/
-
 // Archive
 
 extern aie_Archive* aie_mkarchive(aie_ArcFormatKind kind,
@@ -180,6 +99,9 @@ extern aie_ArcUnit aie_arcunit(char* name,
                                unsigned size,
                                aie_ArcUnitFlags flags);
     // create unit
+
+extern int aie_arcunit_clean(aie_ArcUnit* unit);
+    // clean unit, deleting its segments list
 
 extern const char* aie_arcunit_name(aie_ArcUnit* unit);
     // return namestring of 'unit'
