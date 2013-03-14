@@ -44,8 +44,7 @@ extern void* aie_malloc(size_t size);
 extern void* aie_realloc(void* pointer, size_t size);
     // convenient wrapper around realloc()
 
-extern void aie_free(void** pointer);
-    // do free(*pointer) and set *pointer to NULL
+extern void aie_free(void* pointer);
 
 extern long aie_fib(int n);
     // return n'th number in fibonacci sequence

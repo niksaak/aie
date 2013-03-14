@@ -5,110 +5,15 @@
 #include <aie_archive.h>
 #include <aie_util.h>
 
-// ArcFormat
-
-const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
-{
-  for(size_t i = 0; i <= (aie_ARC_FORMAT_KIND_MAX); i++) {
-    if(aie_arcformats[i]->id == kind)
-      return aie_arcformats[i];
-  }
-
-  return aie_arcfmt(aie_ARC_UNSUPPORTED);
-}
-
-const char* aie_arcfmt_name(const aie_ArcFormat* format)
-{
-  return format->name;
-}
-
-const char* aie_arcfmt_subformats(const aie_ArcFormat* format)
-{
-  if(format->subformat_names[0] == 0)
-    return NULL;
-  return format->subformat_names;
-}
-
-const char* aie_arcfmt_extensions(const aie_ArcFormat* format)
-{
-  static char extensions[512] = {0};
-
-  strncat(extensions, format->arc_ext, sizeof extensions - 1);
-  sprintf(extensions, " ");
-  strncat(extensions, format->meta_ext, 
-          sizeof extensions - strlen(extensions));
-
-  return extensions;
-}
-
-aie_ArcFormatStatus aie_arcfmt_status(const aie_ArcFormat* format)
-{
-  return format->status;
-}
-
-const char* aie_arcfmt_statusstr(const aie_ArcFormat* format)
-{
-  aie_ArcFormatStatus status = aie_arcfmt_status(format);
-  static char ret[512] = {0};
-  char* str = NULL;
-
-  switch(status & 0x7FFFFFFF)
-  {
-    case aie_NORMAL:
-      str = "Normal";
-      break;
-    case aie_UNSAFE:
-      str = "Unsafe";
-      break;
-    case aie_EXPERIMENTAL:
-      str = "Experimental";
-      break;
-    case aie_HACK:
-      str = "Hack";
-      break;
-    case aie_WRITEONLY:
-      str = "Write only";
-      break;
-    case aie_READONLY:
-      str = "Read only";
-      break;
-  }
-
-  snprintf(ret, sizeof ret, str);
-  if(status & aie_PLACEHOLDER)
-    snprintf(ret, sizeof ret - strlen(ret) - 1, ", Placeholder");
-
-  return ret;
-}
-
-size_t aie_arcfmt_namelen(const aie_ArcFormat* format)
-{
-  return format->filename_len;
-}
-
-uint32_t aie_arcfmt_ver(const aie_ArcFormat* format)
-{
-  return format->drv_version;
-}
+#define TABLE_UNITS_DEFAULT 256
+    // default quantity of preallocated units for aie_aloarctable();
 
 // Archive
 
-aie_Archive* aie_aloarchive(void)
+aie_Archive* aie_mkarchive(
+    aie_ArcFormatKind kind, aie_ArcUnitTable* table, aie_ArcFile* files)
 {
-  aie_Archive* arc = aie_alloc(sizeof (aie_Archive));
-
-  arc->fmt = aie_ARC_UNSUPPORTED;
-  arc->table = NULL;
-  arc->files = NULL;
-
-  return arc;
-}
-
-aie_Archive* aie_mkarchive(aie_ArcFormatKind kind,
-                           aie_ArcUnitTable table,
-                           aie_ArcFile* files)
-{
-  aie_Archive arc = aie_alloc(sizeof (aie_Archive));
+  aie_Archive* arc = aie_malloc(sizeof (aie_Archive));
 
   arc->fmt = aie_arcfmt(kind);
   arc->table = table;
@@ -117,25 +22,13 @@ aie_Archive* aie_mkarchive(aie_ArcFormatKind kind,
   return arc;
 }
 
-void aie_frearchive(aie_Archive* archive)
+int aie_kmarchive(aie_Archive* archive)
 {
-  if(archive != NULL) {
-    aie_free(archive);
-  }
-  return;
-}
-
-bool aie_kmarchive(aie_Archive* archive)
-{
-  if(archive == NULL) {
-    return false;
-  }
-
   aie_kmarctable(archive->table);
-  aie_kmarcfile(archive->file);
-  aie_frearchive(archive);
-
-  return true;
+  aie_arcfile_destroy(&archive->files);
+  aie_free(archive);
+  
+  return 0;
 }
 
 const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive)
@@ -153,27 +46,69 @@ aie_ArcFile* aie_arch_parts(aie_Archive* hive)
   return hive->files;
 }
 
-// ArcUnit and friends
+// ArcUnitTable
 
-aie_ArcUnit* aie_arcunit_get(aie_ArcUnitTable* table, size_t index)
+aie_ArcUnitTable* aie_mkarctable(unsigned units_count)
 {
-  if(index >= table->unitc)
-    return NULL;
+  unsigned quantity = units_count ? units_count : TABLE_UNITS_DEFAULT;
+  size_t units_alloc = quantity * sizeof (aie_ArcUnit);
+  aie_ArcUnitTable* aut = aie_malloc(sizeof (aie_ArcUnitTable) + units_alloc);
+
+  aut->unitc = 0;
+  aut->allocated = sizeof (aie_ArcUnitTable) + units_alloc;
+  
+  return aut;
+}
+
+int aie_kmarctable(aie_ArcUnitTable* table)
+{
+  for(size_t i; i < table->unitc; i++)
+    aie_arcunit_clean(&table->unitv[i]);
+  aie_free(table);
+
+  return 0;
+}
+
+aie_ArcUnit* aie_arctable_get(aie_ArcUnitTable* table, size_t index)
+{
   return &table->unitv[index];
 }
 
-size_t aie_arcunit_push(aie_ArcUnit unit, aie_ArcUnitTable** tableptr)
+aie_ArcUnit* aie_arctable_unitv(aie_ArcUnitTable* table)
 {
-  aie_ArcUnitTable* table = *tableptr;
+  return table->unitv;
+}
 
-  if((table->unitc + 1) * sizeof unit > table->allocated) {
-    unsigned fib = aie_nextfib(table->allocated);
+size_t aie_arctable_put(char* name, aie_ArcUnitSegment* segments,
+    size_t size, aie_ArcUnitFlags flags, aie_ArcUnitTable** table)
+{
+  size_t index = (*table)->unitc + 1;
+  size_t new_count = (*table)->unitc + 2;
+  aie_ArcUnit* unit = &(*table)->unitv[index];
 
-    *tableptr = aie_realloc(table,
-        sizeof aie_ArcUnitTable + fib - fib % sizeof unit);
+  if(new_count * sizeof unit > (*table)->allocated) {
+    unsigned fib = aie_nextfib((*table)->allocated);
+
+    *table =
+      aie_realloc(*table, sizeof (aie_ArcUnitTable) + fib - fib % sizeof *unit);
   }
 
-  return (*tableptr)->unitc++;
+  unit->name = name;
+  unit->segments = segments;
+  unit->size = size;
+  unit->flags = flags;
+
+  return ++(*table)->unitc;
+}
+
+// ArcUnit
+
+int aie_arcunit_clean(aie_ArcUnit* unit)
+{
+  aie_free(unit->name);
+  aie_arcsegment_destroy(&unit->segments);
+
+  return 0;
 }
 
 const char* aie_arcunit_name(const aie_ArcUnit* unit)
@@ -186,31 +121,80 @@ unsigned aie_arcunit_uncompressed_size(const aie_ArcUnit* unit)
   return unit->size;
 }
 
-static unsigned impl_arcunit_segments_size_sum(aie_ArcUnitSegment* seg)
-{
-  if(seg) {
-    return seg->size + impl_arcunit_segments_size_sum(seg->next);
-  }
-
-  return 0;
-}
-
 unsigned aie_arcunit_compressed_size(const aie_ArcUnit* unit)
 {
-  return impl_arcunit_segments_size_sum(unit->segments);
+  // FIXME or even REMOVEME
+  return -1;
 }
 
-unsigned aie_arcunit_segcount(const aie_ArcUnit* unit)
+aie_ArcUnitSegment* aie_arcunit_segments(aie_ArcUnit* unit)
 {
-  unsigned i = 0;
-
-  for(aie_ArcUnitSegment* seg = unit->segments; seg != NULL; seg = seg->next)
-    i++;
-
-  return i;
+  return unit->segments;
 }
 
 bool aie_arcunit_getflags(const aie_ArcUnit* unit, aie_ArcUnitFlags flags)
 {
   return (unit->flags & flags) == flags;
 }
+
+// ArcUnitSegment
+
+aie_ArcUnitSegment* aie_arcsegment_push(aie_ArcFile* file,
+    size_t offset, size_t size, aie_ArcUnitSegment** list)
+{
+  aie_ArcUnitSegment* aus = aie_malloc(sizeof (aie_ArcUnitSegment));
+
+  aus->file = file;
+  aus->offset = offset;
+  aus->size = size;
+  aus->next = *list;
+  *list = aus;
+
+  return aus;
+}
+
+int aie_arcsegment_destroy(aie_ArcUnitSegment** list)
+{
+  static aie_ArcUnitSegment* cdr = NULL;
+      // static because ai am not sure about this befriending TCO otherwise
+
+  if(list == NULL)
+    return 0;
+
+  cdr = *list != NULL ? (*list)->next : NULL;
+  aie_free(*list);
+  *list = NULL;
+
+  return aie_arcsegment_destroy(&cdr);
+}
+
+// ArcFile
+
+aie_ArcFile* aie_arcfile_push(FILE* file, char* name, int role,
+                              aie_ArcFile** list)
+{
+  aie_ArcFile* arf = aie_malloc(sizeof (aie_ArcFile));
+
+  arf->file = file;
+  arf->name = name;
+  arf->role = role;
+  arf->next = *list;
+  *list = arf;
+
+  return arf;
+}
+
+int aie_arcfile_destroy(aie_ArcFile** list)
+{
+  static aie_ArcFile* cdr = NULL;
+
+  if(list == NULL)
+    return 0;
+
+  cdr = *list != NULL ? (*list)->next : NULL;
+  aie_free(*list);
+  *list = NULL;
+
+  return aie_arcfile_destroy(&cdr);
+}
+

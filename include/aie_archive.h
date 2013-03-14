@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <aie_archive-kinds.h>
+#include <aie_archive-format.h>
 #include <aie_util.h>
 
 // Types:
@@ -18,8 +18,8 @@ typedef enum aie_ArcUnitFlags
 typedef struct aie_ArcUnitSegment
 { // Represents segment of archived file, can form linked list
   struct aie_ArcFile* file;     // file where segment starts
-  unsigned offset;              // offset of segment, filewise
-  unsigned size;                // segment size
+  size_t offset;                // offset of segment, filewise
+  size_t size;                  // segment size
   struct aie_ArcUnitSegment* next;
 } aie_ArcUnitSegment;
 
@@ -55,88 +55,85 @@ typedef struct aie_Archive
 
 // Archive
 
-extern aie_Archive* aie_mkarchive(aie_ArcFormatKind kind,
-                                  aie_ArcUnitTable* table,
-                                  aie_ArcFile* files);
+aie_Archive* aie_mkarchive(aie_ArcFormatKind kind,
+                           aie_ArcUnitTable* table,
+                           aie_ArcFile* files);
     // make archive
 
-extern int aie_kmarchive(aie_Archive* archive);
+int aie_kmarchive(aie_Archive* archive);
     // deallocate archive and its contents
 
-extern const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive);
+const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive);
     // get archive format
 
-extern aie_ArcUnitTable* aie_arch_table(aie_Archive* hive);
+aie_ArcUnitTable* aie_arch_table(aie_Archive* hive);
     // get archive allocation table
 
-extern aie_ArcFile* aie_arch_parts(aie_Archive* hive);
+aie_ArcFile* aie_arch_parts(aie_Archive* hive);
     // get list of archive parts
 
 // ArcUnitTable
 
-extern aie_ArcUnitTable* aie_mkarctable(unsigned units_count);
+aie_ArcUnitTable* aie_mkarctable(unsigned units_count);
     // make ArcTable with place for 'units_count' units preallocated,
     // or default amount if 'units_count' == 0
 
-extern int aie_kmarctable(aie_ArcUnitTable* table);
+int aie_kmarctable(aie_ArcUnitTable* table);
     // kill table and its units
 
-extern aie_ArcUnit* aie_arctable_get(aie_ArcUnitTable* table, size_t index);
+aie_ArcUnit* aie_arctable_get(aie_ArcUnitTable* table, size_t index);
     // get ArcUnit placed at 'index' in table.
     // returns NULL if index is too big
 
-extern aie_ArcUnit* aie_arctable_unitv(aie_ArcUnitTable* table);
+aie_ArcUnit* aie_arctable_unitv(aie_ArcUnitTable* table);
     // get units array from 'table'
     // same as aie_arctable_get(table, 0) for now
 
-extern unsigned aie_arctable_push(aie_ArcUnitTable* table, aie_ArcUnit unit);
-    // push 'unit' to table, return 'unit's index in table
+size_t aie_arctable_put(char* name,
+                        aie_ArcUnitSegment* segments,
+                        size_t size, aie_ArcUnitFlags flags,
+                        aie_ArcUnitTable** table);
+    // put 'unit' into table, return 'unit's index in table
 
 // ArcUnit
 
-extern aie_ArcUnit aie_arcunit(char* name,
-                               aie_ArcUnitSegment* segments,
-                               unsigned size,
-                               aie_ArcUnitFlags flags);
-    // create unit
-
-extern int aie_arcunit_clean(aie_ArcUnit* unit);
+int aie_arcunit_clean(aie_ArcUnit* unit);
     // clean unit, deleting its segments list
 
-extern const char* aie_arcunit_name(aie_ArcUnit* unit);
-    // return namestring of 'unit'
+const char* aie_arcunit_name(const aie_ArcUnit* unit);
+    // return namestring for 'unit'
 
-extern unsigned aie_arcunit_uncompressed_size(aie_ArcUnit* unit);
+unsigned aie_arcunit_uncompressed_size(const aie_ArcUnit* unit);
     // return size of uncompressed 'unit', if available
 
-extern unsigned aie_arcunit_compressed_size(aie_ArcUnit* unit);
+unsigned aie_arcunit_compressed_size(const aie_ArcUnit* unit);
     // return size of 'unit' in archive
 
-extern aie_ArcUnitSegment* aie_arcunit_segments(aie_ArcUnit* unit);
+aie_ArcUnitSegment* aie_arcunit_segments(aie_ArcUnit* unit);
     // get segments list from 'unit'
 
-extern bool
+bool
 aie_arcunit_getflags(const aie_ArcUnit* unit, aie_ArcUnitFlags flags);
     // return true if flags is set
 
 // ArcUnitSegment
 
-extern aie_ArcUnitSegment* aie_arcsegment_push(aie_ArcFile* file,
-                                               unsigned offset,
-                                               unsigned size,
-                                               aie_ArcUnitSegment** list);
+aie_ArcUnitSegment* aie_arcsegment_push(aie_ArcFile* file,
+                                        size_t offset,
+                                        size_t size,
+                                        aie_ArcUnitSegment** list);
     // push new ArcUnitSegment to list
 
-extern int aie_arcsegment_destroy(aie_ArcUnitSegment** list);
+int aie_arcsegment_destroy(aie_ArcUnitSegment** list);
     // destroy segments list
 
 // ArcFile
 
-extern aie_ArcFile* aie_arcfile_push(FILE* file,
-                                     char* name,
-                                     unsigned role,
-                                     aie_ArcFile** list);
+aie_ArcFile* aie_arcfile_push(FILE* file,
+                              char* name,
+                              int role,
+                              aie_ArcFile** list);
     // push new ArcFile to list
 
-extern int aie_arcfile_destroy(aie_ArcFile** list);
+int aie_arcfile_destroy(aie_ArcFile** list);
     // destroy archive parts list

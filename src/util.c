@@ -90,10 +90,9 @@ void* aie_realloc(void* pointer, size_t size)
   return pointer;
 }
 
-void aie_free(void** pointer)
+void aie_free(void* pointer)
 {
-  free(*pointer);
-  *pointer = NULL;
+  free(pointer);
 }
 
 long aie_fib(int n)

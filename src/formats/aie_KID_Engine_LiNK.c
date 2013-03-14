@@ -21,6 +21,11 @@ typedef struct arc_entry_t {
   char fname[24];
 } arc_entry_t;
 
+aie_Archive* open(const char* name);
+aie_Archive* create(const char* name);
+bool extract(aie_Archive* archive);
+
+/* TODO: REDO
 aie_Archive* open(const char* name)
 {
   FILE* file = fopen(name, "r");
@@ -74,6 +79,7 @@ aie_Archive* open(const char* name)
 aie_Archive* create(const char* name) { return NULL; }
 
 bool extract(aie_Archive* archive) { return false; }
+*/
 
 aie_ArcFormat KID_Engine_LiNK = // format description
 {

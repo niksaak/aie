@@ -1,7 +1,10 @@
 #pragma once
 
+#include <stdlib.h>
 #include <stdbool.h>
 #include <inttypes.h>
+
+#include <aie_archive-kinds.h>
 
 typedef enum aie_ArcFormatStatus
 { // Formatter statuses
