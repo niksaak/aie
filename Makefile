@@ -19,7 +19,7 @@ FORMATS_OBJECTS += $(FORMATS_SOURCES:.c=.o)
 
 OBJECTS = $(FORMATS_OBJECTS) $(MAIN_OBJECTS)
 
-.PHONY: all debug release static_lib dynamic_lib clean cleandist
+.PHONY: all debug release static_lib dynamic_lib core formats clean cleandist
 
 all: static_lib dynamic_lib
 
@@ -32,6 +32,10 @@ release: clean cleandist
 static_lib: $(STATIC_LIB)
 
 dynamic_lib: $(DYNAMIC_LIB)
+
+core: $(MAIN_OBJECTS)
+
+formats: $(FORMATS_OBJECTS)
 
 $(STATIC_LIB): $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
 	ar -rcuv $@ $?
