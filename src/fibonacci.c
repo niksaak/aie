@@ -50,3 +50,46 @@ unsigned long aie_fibnums[AIE_FIBONACCI_ARR_LEN] =
     // more than 158 NYACKIN MEGABYTES in one chunk, it will be fast enough
 };
 
+long aie_fib(int n)
+{ // TODO: possibly make this inlined
+  if(n > 0) {
+    if(n < 39) {
+      return aie_fibnums[n];
+    } else 
+      return aie_fib(n - 1) + aie_fib(n - 2);
+  }
+
+  return 0;
+}
+
+long aie_nextfib(long n)
+{
+  unsigned i = 0;
+
+  while(++i) {
+    long f = aie_fib(i);
+
+    if(f > n)
+      return f;
+  }
+  
+  return -1;
+}
+
+long aie_prevfib(long n)
+{
+  unsigned i = 0;
+  long prev = 0;
+
+  while(++i) {
+    long f = aie_fib(i);
+
+    if(f > n)
+      return prev;
+
+    prev = f;
+  }
+
+  return -1;
+}
+

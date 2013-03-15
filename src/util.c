@@ -7,7 +7,7 @@
 
 #include <aie_util.h>
 
-#include "fibonacci.h"
+#include "fibonacci.c"
 
 void promulgate(aie_PromulgationLevel level, const char* file, const char* func,
     const char* promulgation, ...)
@@ -93,48 +93,5 @@ void* aie_realloc(void* pointer, size_t size)
 void aie_free(void* pointer)
 {
   free(pointer);
-}
-
-long aie_fib(int n)
-{ // TODO: possibly make this inlined
-  if(n > 0) {
-    if(n < 39) {
-      return aie_fibnums[n];
-    } else 
-      return aie_fib(n - 1) + aie_fib(n - 2);
-  }
-
-  return 0;
-}
-
-long aie_nextfib(long n)
-{
-  unsigned i = 0;
-
-  while(++i) {
-    long f = aie_fib(i);
-
-    if(f > n)
-      return f;
-  }
-  
-  return -1;
-}
-
-long aie_prevfib(long n)
-{
-  unsigned i = 0;
-  long prev = 0;
-
-  while(++i) {
-    long f = aie_fib(i);
-
-    if(f > n)
-      return prev;
-
-    prev = f;
-  }
-
-  return -1;
 }
 
