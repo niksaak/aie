@@ -1,6 +1,6 @@
-#pragma once
-
 #define AIE_FIBONACCI_ARR_LEN 42
+
+#include <aie_util.h>
 
 unsigned long aie_fibnums[AIE_FIBONACCI_ARR_LEN] =
 { // lookup table for aie_fib() function
