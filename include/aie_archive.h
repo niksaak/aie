@@ -55,7 +55,7 @@ typedef struct aie_Archive
 
 // Archive
 
-aie_Archive* aie_mkarchive(aie_ArcFormatKind kind,
+aie_Archive* aie_mkarchive(aie_ArcFormat* format,
                            aie_ArcUnitTable* table,
                            aie_ArcFile* files);
     // make archive
@@ -89,11 +89,12 @@ aie_ArcUnit* aie_arctable_unitv(aie_ArcUnitTable* table);
     // get units array from 'table'
     // same as aie_arctable_get(table, 0) for now
 
-size_t aie_arctable_put(char* name,
+size_t aie_arctable_put(const char* name,
                         aie_ArcUnitSegment* segments,
                         size_t size, aie_ArcUnitFlags flags,
                         aie_ArcUnitTable** table);
     // put 'unit' into table, return 'unit's index in table
+    // create new table if *table is NULL
 
 // ArcUnit
 
@@ -130,10 +131,11 @@ int aie_arcsegment_destroy(aie_ArcUnitSegment** list);
 // ArcFile
 
 aie_ArcFile* aie_arcfile_push(FILE* file,
-                              char* name,
+                              const char* name,
                               int role,
                               aie_ArcFile** list);
     // push new ArcFile to list
 
 int aie_arcfile_destroy(aie_ArcFile** list);
     // destroy archive parts list
+

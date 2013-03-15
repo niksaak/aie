@@ -11,11 +11,11 @@
 // Archive
 
 aie_Archive* aie_mkarchive(
-    aie_ArcFormatKind kind, aie_ArcUnitTable* table, aie_ArcFile* files)
+    aie_ArcFormat* format, aie_ArcUnitTable* table, aie_ArcFile* files)
 {
   aie_Archive* arc = aie_malloc(sizeof (aie_Archive));
 
-  arc->fmt = aie_arcfmt(kind);
+  arc->fmt = format;
   arc->table = table;
   arc->files = files;
 
@@ -26,7 +26,7 @@ int aie_kmarchive(aie_Archive* archive)
 {
   aie_kmarctable(archive->table);
   aie_arcfile_destroy(&archive->files);
-  aie_free(archive);
+  free(archive);
   
   return 0;
 }
@@ -64,7 +64,7 @@ int aie_kmarctable(aie_ArcUnitTable* table)
 {
   for(size_t i; i < table->unitc; i++)
     aie_arcunit_clean(&table->unitv[i]);
-  aie_free(table);
+  free(table);
 
   return 0;
 }
@@ -79,9 +79,14 @@ aie_ArcUnit* aie_arctable_unitv(aie_ArcUnitTable* table)
   return table->unitv;
 }
 
-size_t aie_arctable_put(char* name, aie_ArcUnitSegment* segments,
+size_t aie_arctable_put(const char* name, aie_ArcUnitSegment* segments,
     size_t size, aie_ArcUnitFlags flags, aie_ArcUnitTable** table)
 {
+  if(*table == NULL) {
+    *table = aie_mkarctable(0);
+  }
+
+  char* namestr = aie_malloc(strlen(name) + 1);
   size_t index = (*table)->unitc + 1;
   size_t new_count = (*table)->unitc + 2;
   aie_ArcUnit* unit = &(*table)->unitv[index];
@@ -93,7 +98,7 @@ size_t aie_arctable_put(char* name, aie_ArcUnitSegment* segments,
       aie_realloc(*table, sizeof (aie_ArcUnitTable) + fib - fib % sizeof *unit);
   }
 
-  unit->name = name;
+  unit->name = strncpy(namestr, name, strlen(name) + 1);
   unit->segments = segments;
   unit->size = size;
   unit->flags = flags;
@@ -105,7 +110,8 @@ size_t aie_arctable_put(char* name, aie_ArcUnitSegment* segments,
 
 int aie_arcunit_clean(aie_ArcUnit* unit)
 {
-  aie_free(unit->name);
+  free(unit->name);
+  unit->name = NULL;
   aie_arcsegment_destroy(&unit->segments);
 
   return 0;
@@ -162,7 +168,7 @@ int aie_arcsegment_destroy(aie_ArcUnitSegment** list)
     return 0;
 
   cdr = *list != NULL ? (*list)->next : NULL;
-  aie_free(*list);
+  free(*list);
   *list = NULL;
 
   return aie_arcsegment_destroy(&cdr);
@@ -170,13 +176,14 @@ int aie_arcsegment_destroy(aie_ArcUnitSegment** list)
 
 // ArcFile
 
-aie_ArcFile* aie_arcfile_push(FILE* file, char* name, int role,
+aie_ArcFile* aie_arcfile_push(FILE* file, const char* name, int role,
                               aie_ArcFile** list)
 {
   aie_ArcFile* arf = aie_malloc(sizeof (aie_ArcFile));
+  char* namestr = aie_malloc(strlen(name) + 1);
 
   arf->file = file;
-  arf->name = name;
+  arf->name = strncpy(namestr, name, strlen(name) + 1);
   arf->role = role;
   arf->next = *list;
   *list = arf;
@@ -192,7 +199,7 @@ int aie_arcfile_destroy(aie_ArcFile** list)
     return 0;
 
   cdr = *list != NULL ? (*list)->next : NULL;
-  aie_free(*list);
+  free(*list);
   *list = NULL;
 
   return aie_arcfile_destroy(&cdr);
