@@ -21,65 +21,53 @@ typedef struct arc_entry_t {
   char fname[24];
 } arc_entry_t;
 
-aie_Archive* open(const char* name);
 aie_Archive* create(const char* name);
 bool extract(aie_Archive* archive);
 
-/* TODO: REDO
 aie_Archive* open(const char* name)
 {
   FILE* file = fopen(name, "r");
-  aie_Archive* ar = aie_mkarchive();
-  struct arc_header_t header = {{0}};
+  aie_Archive* arc = aie_mkarchive(&KID_Engine_LiNK, NULL, NULL);
+  struct arc_header_t header;
+  struct arc_entry_t entry;
 
-  errno = 0;
+  aie_arcfile_push(file, name, 0, &arc->files);
 
   if(file == NULL) {
     AIE_ERROR("Unable to open file at %s: %s", name, strerror(errno));
     return NULL;
   }
 
-  fread(&header, sizeof header, 1, file);
+  errno = 0;
 
-  if(strncmp(header.magic, "LNK", 4)) {
+  if(!fread(&header, sizeof header, 1, file) || feof(file) || ferror(file)) {
+    AIE_ERROR("Unable to read from '%s'", name);
+    aie_kmarchive(arc);
+    return NULL;
+  } else if(strncmp(header.magic, "LNK", 4)) {
     AIE_DEBUG("file %s is not of format \"KID Engine LiNK\"");
-    fclose(file);
+    aie_kmarchive(arc);
     return NULL;
   }
 
-  {
-    aie_ArcFile* arcfile = aie_mkarcfile();
-    aie_ArcUnitTable* table = aie_mkarctable();
-    arc_entry_t entry = {0};
-    unsigned arc_offset = header.fcount * sizeof entry + sizeof header;
+  size_t arc_offset = header.fcount * sizeof entry + sizeof header;
 
-    arcfile->name = name;
-    arcfile->file = file;
+  for(size_t i; i < header.fcount; i++) {
+    aie_ArcUnitSegment* seg = NULL;
 
-    for(size_t i = 0; i < header.fcount; i++) {
-      aie_ArcUnitSegment* seg = aie_mkarcunitseg();
-      aie_ArcUnit unit = {entry.fname, seg, entry.fsize2, 0};
-
-      fread(&entry, sizeof entry, 1, file);
-      seg->file = arcfile;
-      seg->offset = entry.offset + arc_offset;
-      seg->size = entry.fsize2 / 2;
-      seg->next = NULL;
-      aie_arcunit_push(unit, &table);
+    if(!fread(&entry, sizeof entry, 1, file) || feof(file) || ferror(file)) {
+      AIE_ERROR("Unable to read from '%s'", name);
+      aie_kmarchive(arc);
+      return NULL;
     }
 
-    ar->fmt = &KID_Engine_LiNK;
-    ar->table = table;
-    ar->files = arcfile;
+    aie_arcsegment_push(arc->files, entry.offset + arc_offset,
+        entry.fsize2 / 2, &seg);
+    aie_arctable_put(entry.fname, seg, entry.fsize2 / 2, 0, &arc->table);
   }
 
-  return ar;
+  return arc;
 }
-
-aie_Archive* create(const char* name) { return NULL; }
-
-bool extract(aie_Archive* archive) { return false; }
-*/
 
 aie_ArcFormat KID_Engine_LiNK = // format description
 {
@@ -91,7 +79,7 @@ aie_ArcFormat KID_Engine_LiNK = // format description
   .meta_ext         = NULL,
   .status           = aie_PLACEHOLDER,
   .filename_len     = 24,
-  .drv_version      = 0x20130224,
+  .drv_version      = 20130224,
 
   .open             = &open,
   .create           = &create,
