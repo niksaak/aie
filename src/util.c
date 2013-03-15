@@ -7,8 +7,6 @@
 
 #include <aie_util.h>
 
-#include "fibonacci.c"
-
 void promulgate(aie_PromulgationLevel level, const char* file, const char* func,
     const char* promulgation, ...)
 {
@@ -88,10 +86,5 @@ void* aie_realloc(void* pointer, size_t size)
   }
 
   return pointer;
-}
-
-void aie_free(void* pointer)
-{
-  free(pointer);
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdlib.h>
+
 #ifdef DEBUG_MODE
 #define AIE_DEBUG(...) \
   promulgate(aie_PROMUL_DEBUG, __FILE__, __func__, __VA_ARGS__)
@@ -18,9 +20,6 @@
 
 #define AIE_FUNCALL(fun, ...) \
   fun == NULL ? NULL : fun(__VA_ARGS__)
-
-#define AIE_FREE(ptr) \
-  aie_free(&ptr)
 
 typedef enum aie_PromulgationLevel {
   aie_PROMUL_DEBUG,
@@ -43,8 +42,6 @@ extern void* aie_malloc(size_t size);
 
 extern void* aie_realloc(void* pointer, size_t size);
     // convenient wrapper around realloc()
-
-extern void aie_free(void* pointer);
 
 extern long aie_fib(int n);
     // return n'th number in fibonacci sequence
