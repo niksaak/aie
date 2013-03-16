@@ -27,7 +27,7 @@ int aie_kmarchive(aie_Archive* archive)
   aie_kmarctable(archive->table);
   aie_arcfile_destroy(&archive->files);
   free(archive);
-  
+
   return 0;
 }
 
@@ -56,7 +56,7 @@ aie_ArcUnitTable* aie_mkarctable(unsigned units_count)
 
   aut->unitc = 0;
   aut->allocated = sizeof (aie_ArcUnitTable) + units_alloc;
-  
+
   return aut;
 }
 

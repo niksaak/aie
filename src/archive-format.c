@@ -33,7 +33,7 @@ const char* aie_arcfmt_extensions(const aie_ArcFormat* format)
 
   strncat(extensions, format->arc_ext, sizeof extensions - 1);
   sprintf(extensions, " ");
-  strncat(extensions, format->meta_ext, 
+  strncat(extensions, format->meta_ext,
           sizeof extensions - strlen(extensions));
 
   return extensions;
@@ -88,5 +88,4 @@ uint32_t aie_arcfmt_ver(const aie_ArcFormat* format)
 {
   return format->drv_version;
 }
-
 

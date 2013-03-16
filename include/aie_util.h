@@ -31,7 +31,7 @@ typedef enum aie_PromulgationLevel {
 extern void
 promulgate(aie_PromulgationLevel level, const char* file, const char* func,
     const char* promulgation, ...);
-    // printf promulgation to stderr, mentioning file and function 
+    // printf promulgation to stderr, mentioning file and function
     // with given level of scare
 
 extern int ran_domo(int min, int max);
