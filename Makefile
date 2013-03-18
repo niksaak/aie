@@ -19,7 +19,8 @@ FORMATS_OBJECTS += $(FORMATS_SOURCES:.c=.o)
 
 OBJECTS = $(FORMATS_OBJECTS) $(MAIN_OBJECTS)
 
-.PHONY: all debug release static_lib dynamic_lib core formats clean cleandist
+.PHONY: all debug release static_lib dynamic_lib core formats test
+.PHONY: clean cleantest cleandist
 
 all: static_lib dynamic_lib
 
@@ -37,6 +38,9 @@ core: $(MAIN_OBJECTS)
 
 formats: $(FORMATS_OBJECTS)
 
+test: all
+	$(MAKE) -C test/ all
+
 $(STATIC_LIB): $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
 	ar -rcuv $@ $?
 
@@ -48,6 +52,9 @@ $(FORMATS_OBJECTS): $(MAIN_OBJECTS)
 clean:
 	@-$(RM) -v $(OBJECTS)
 
-cleandist:
+cleantest:
+	$(MAKE) -C test/ clean cleandist
+
+cleandist: cleantest
 	@-$(RM) -v $(STATIC_LIB) $(DYNAMIC_LIB)
 
