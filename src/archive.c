@@ -62,7 +62,7 @@ aie_ArcUnitTable* aie_mkarctable(unsigned units_count)
 
 int aie_kmarctable(aie_ArcUnitTable* table)
 {
-  for(size_t i; i < table->unitc; i++)
+  for(size_t i = 0; i < table->unitc; i++)
     aie_arcunit_clean(&table->unitv[i]);
   free(table);
 
@@ -87,8 +87,8 @@ size_t aie_arctable_put(const char* name, aie_ArcUnitSegment* segments,
   }
 
   char* namestr = aie_malloc(strlen(name) + 1);
-  size_t index = (*table)->unitc + 1;
-  size_t new_count = (*table)->unitc + 2;
+  size_t index = (*table)->unitc;
+  size_t new_count = (*table)->unitc + 1;
   aie_ArcUnit* unit = &(*table)->unitv[index];
 
   if(new_count * sizeof unit > (*table)->allocated) {
@@ -164,10 +164,10 @@ int aie_arcsegment_destroy(aie_ArcUnitSegment** list)
   static aie_ArcUnitSegment* cdr = NULL;
       // static because ai am not sure about this befriending TCO otherwise
 
-  if(list == NULL)
+  if(*list == NULL)
     return 0;
 
-  cdr = *list != NULL ? (*list)->next : NULL;
+  cdr = (*list)->next;
   free(*list);
   *list = NULL;
 
@@ -195,10 +195,10 @@ int aie_arcfile_destroy(aie_ArcFile** list)
 {
   static aie_ArcFile* cdr = NULL;
 
-  if(list == NULL)
+  if(*list == NULL)
     return 0;
 
-  cdr = *list != NULL ? (*list)->next : NULL;
+  cdr = (*list)->next;
   free(*list);
   *list = NULL;
 

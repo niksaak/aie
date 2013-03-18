@@ -11,18 +11,18 @@
 
 typedef struct arc_header_t {
   char magic[4];
-  uint64_t fcount;
+  uint32_t fcount;
   uint64_t dummy;
 } arc_header_t;
 
 typedef struct arc_entry_t {
-  uint64_t offset;
-  uint64_t fsize2;
+  uint32_t offset;
+  uint32_t fsize2;
   char fname[24];
 } arc_entry_t;
 
-aie_Archive* create(const char* name);
-bool extract(aie_Archive* archive);
+aie_Archive* create(const char* name) { return NULL; } // FIXME
+bool extract(aie_Archive* archive) { return false; } // FIXME
 
 aie_Archive* open(const char* name)
 {
@@ -34,7 +34,7 @@ aie_Archive* open(const char* name)
   aie_arcfile_push(file, name, 0, &arc->files);
 
   if(file == NULL) {
-    AIE_ERROR("Unable to open file at %s: %s", name, strerror(errno));
+    AIE_ERROR("Unable to open file '%s'.", name);
     return NULL;
   }
 
@@ -52,7 +52,7 @@ aie_Archive* open(const char* name)
 
   size_t arc_offset = header.fcount * sizeof entry + sizeof header;
 
-  for(size_t i; i < header.fcount; i++) {
+  for(size_t i = 0; i < header.fcount; i++) {
     aie_ArcUnitSegment* seg = NULL;
 
     if(!fread(&entry, sizeof entry, 1, file) || feof(file) || ferror(file)) {
@@ -85,7 +85,4 @@ aie_ArcFormat KID_Engine_LiNK = // format description
   .create           = &create,
   .extract          = &extract,
 };
-// C standard requires static structs to be initially filled with zeroes,
-// so we actually can to omit the fields with NULLs/0s, but better
-// make sure, in case of dumb compiler
 
