@@ -41,6 +41,9 @@ formats: $(FORMATS_OBJECTS)
 test: all
 	$(MAKE) -C test/ all
 
+runtest: test
+	$(MAKE) -C test/ run
+
 $(STATIC_LIB): $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
 	ar -rcuv $@ $?
 

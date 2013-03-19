@@ -11,7 +11,7 @@ OBJECTS = $(SOURCES:.c=.o)
 
 .PHONY: all run clean cleandist
 
-all: clean $(NAME)
+all: $(NAME)
 
 run: $(NAME)
 	./$<
