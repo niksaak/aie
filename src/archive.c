@@ -4,6 +4,7 @@
 #include <aie_formats.h>
 #include <aie_archive.h>
 #include <aie_util.h>
+#include <aie_fibonacci.h>
 
 #define TABLE_UNITS_DEFAULT 256
     // default quantity of preallocated units for aie_aloarctable();
