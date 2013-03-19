@@ -41,7 +41,7 @@ formats: $(FORMATS_OBJECTS)
 test: all
 	$(MAKE) -C test/ all
 
-runtest: test
+runtest:
 	$(MAKE) -C test/ run
 
 $(STATIC_LIB): $(MAIN_OBJECTS) $(FORMATS_OBJECTS)

@@ -88,3 +88,30 @@ void* aie_realloc(void* pointer, size_t size)
   return pointer;
 }
 
+int aie_strtoks(char* string, int delim, char** dest, size_t count)
+{
+  int i = 0;
+  int j = 0;
+  size_t len = strlen(string);
+
+  dest[j++] = string;
+
+  for(; i < len && j <= count; i++)
+    if(string[i] == delim)
+      dest[j++] = &string[i + 1];
+
+  return j;
+}
+
+char* aie_tokcpy(char* dest, const char* src, int delim, size_t size)
+{
+  size_t len = strlen(src);
+  int i = 0;
+
+  for(; i < len && i < size && src[i] != delim; i++)
+    dest[i] = src[i];
+  dest[i] = '\0';
+
+  return dest;
+}
+

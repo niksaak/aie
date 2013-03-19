@@ -53,6 +53,29 @@ void archive_filename(void)
   ASSERT(!strcmp(archive->files->name, "script.rus"));
 }
 
+void strtoks_delim_at_end(void)
+{
+  char str[] = "delimiting space at the end of the string ";
+  char* toks[9] = {NULL};
+  int tokc = 0;
+
+  tokc = aie_strtoks(str, ' ', toks, 9);
+
+  ASSERT(*toks[tokc - 1] == '\0');
+}
+
+void tokcpy_sane(void)
+{
+  char src[] = "The source";
+  char dst[9] = {0};
+  char chk[9] = {0};
+
+  strncpy(chk, src, 3);
+  aie_tokcpy(dst, src, ' ', 9);
+
+  ASSERT(!strcmp(dst, chk));
+}
+
 int main(int argc, char** argv)
 {
   TEST(arcfmt_select);
@@ -61,8 +84,11 @@ int main(int argc, char** argv)
   TEST(archive_kill);
   TEST(archive_files_nonNULL);
   TEST(archive_filename);
+  TEST(strtoks_delim_at_end);
+  TEST(tokcpy_sane);
   test_summary();
 
+  /*
   puts("\nNow real action - printing archive contents...");
   {
     const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
@@ -74,6 +100,7 @@ int main(int argc, char** argv)
     }
   }
   puts("Done?");
+  */
 
   return 0;
 }

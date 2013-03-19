@@ -8,7 +8,7 @@
       printf("OK\n"); \
       test_status = 0; \
     } else { \
-      printf("FAILED: %s\n", #assertion); \
+      printf("FAILED (%s)\n", #assertion); \
       test_status = 1; \
     } \
   } while(0)
