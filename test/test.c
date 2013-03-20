@@ -64,6 +64,16 @@ void strtoks_delim_at_end(void)
   ASSERT(*toks[tokc - 1] == '\0');
 }
 
+void strtoks_many_delim(void)
+{
+  char str[] = "many   delimiters";
+  char* toks[9] = {NULL};
+
+  aie_strtoks(str, ' ', toks, 9);
+
+  ASSERT(!strcmp(toks[1], "delimiters"));
+}
+
 void tokcpy_sane(void)
 {
   char src[] = "The source";
@@ -85,22 +95,23 @@ int main(int argc, char** argv)
   TEST(archive_files_nonNULL);
   TEST(archive_filename);
   TEST(strtoks_delim_at_end);
+  TEST(strtoks_many_delim);
   TEST(tokcpy_sane);
   test_summary();
 
-  /*
+
   puts("\nNow real action - printing archive contents...");
   {
     const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
     aie_Archive* arc = fmt->open("script.rus");
 
+    printf("Formatter features: [%s]\n", aie_arcfmt_featurestr(fmt));
     printf("Contents of %s:\n", arc->files->name);
     for(int i = 0; i < arc->table->unitc; i++) {
       puts(arc->table->unitv[i].name);
     }
   }
   puts("Done?");
-  */
 
   return 0;
 }

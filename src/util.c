@@ -97,7 +97,7 @@ int aie_strtoks(char* string, int delim, char** dest, size_t count)
   dest[j++] = string;
 
   for(; i < len && j <= count; i++)
-    if(string[i] == delim)
+    if(string[i] == delim && string[i + 1] != delim)
       dest[j++] = &string[i + 1];
 
   return j;
