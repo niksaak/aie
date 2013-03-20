@@ -17,7 +17,7 @@ run: $(NAME)
 	./$<
 
 $(NAME): $(OBJECTS)
-	$(CC) -o $@ $? $(LDFLAGS)
+	$(CC) -o $@ $(OBJECTS) $(LDFLAGS)
 
 clean:
 	@-$(RM) -v $(OBJECTS)

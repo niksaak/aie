@@ -17,7 +17,7 @@ MAIN_OBJECTS = $(MAIN_SOURCES:.c=.o)
 FORMATS_SOURCES += $(wildcard src/formats/*.c)
 FORMATS_OBJECTS += $(FORMATS_SOURCES:.c=.o)
 
-OBJECTS = $(FORMATS_OBJECTS) $(MAIN_OBJECTS)
+OBJECTS = $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
 
 .PHONY: all debug release static_lib dynamic_lib core formats test
 .PHONY: clean cleantest cleandist
@@ -41,14 +41,14 @@ formats: $(FORMATS_OBJECTS)
 test: all
 	$(MAKE) -C test/ all
 
-runtest:
+runtest: all
 	$(MAKE) -C test/ run
 
-$(STATIC_LIB): $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
+$(STATIC_LIB): $(OBJECTS)
 	ar -rcuv $@ $?
 
-$(DYNAMIC_LIB): $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
-	ld -Bshareable -o $@ $?
+$(DYNAMIC_LIB): $(OBJECTS)
+	ld -Bshareable -o $@ $(OBJECTS)
 
 $(FORMATS_OBJECTS): $(MAIN_OBJECTS)
 
