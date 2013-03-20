@@ -34,7 +34,7 @@ aie_Archive* open(const char* name)
   aie_arcfile_push(file, name, 0, &arc->files);
 
   if(file == NULL) {
-    AIE_ERROR("Unable to open file '%s'.", name);
+    AIE_WARN("Unable to open file '%s'.", name);
     return NULL;
   }
 
@@ -77,7 +77,7 @@ aie_ArcFormat KID_Engine_LiNK = // format description
   .subformat_names  = NULL,
   .arc_ext          = "dat",
   .meta_ext         = NULL,
-  .status           = aie_PLACEHOLDER,
+  .features         = aie_FMTOpen | aie_FMTUnsafe,
   .filename_len     = 24,
   .drv_version      = 20130224,
 

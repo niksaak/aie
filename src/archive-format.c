@@ -39,42 +39,35 @@ const char* aie_arcfmt_extensions(const aie_ArcFormat* format)
   return extensions;
 }
 
-aie_ArcFormatStatus aie_arcfmt_status(const aie_ArcFormat* format)
+aie_ArcFormatFeatures aie_arcfmt_features(const aie_ArcFormat* format)
 {
-  return format->status;
+  return format->features;
 }
 
-const char* aie_arcfmt_statusstr(const aie_ArcFormat* format)
+const char* aie_arcfmt_featurestr(const aie_ArcFormat* format)
 {
-  aie_ArcFormatStatus status = aie_arcfmt_status(format);
+  aie_ArcFormatFeatures features = aie_arcfmt_features(format);
   static char ret[512] = {0};
-  char* str = NULL;
+  int pos = 0;
 
-  switch(status & 0x7FFFFFFF)
-  {
-    case aie_NORMAL:
-      str = "Normal";
-      break;
-    case aie_UNSAFE:
-      str = "Unsafe";
-      break;
-    case aie_EXPERIMENTAL:
-      str = "Experimental";
-      break;
-    case aie_HACK:
-      str = "Hack";
-      break;
-    case aie_WRITEONLY:
-      str = "Write only";
-      break;
-    case aie_READONLY:
-      str = "Read only";
-      break;
+  if(features == aie_FMTOK) {
+    sprintf(ret, "OK");
+  } else {
+    if(features & aie_FMTOpen)
+      pos = snprintf(&ret[pos], 512, "Open | ");
+    if(features & aie_FMTExtract)
+      pos = snprintf(&ret[pos], 512 - strlen(ret), "Extract | ");
+    if(features & aie_FMTCreate)
+      pos = snprintf(&ret[pos], 512 - strlen(ret), "Create | ");
+    if(features & aie_FMTUnsafe)
+      pos = snprintf(&ret[pos], 512 - strlen(ret), "Unsafe | ");
+    if(features & aie_FMTHack)
+      pos = snprintf(&ret[pos], 512 - strlen(ret), "Hack | ");
+    if(features & aie_FMTPlaceholder)
+      pos = snprintf(&ret[pos], 512 - strlen(ret), "Placeholder | ");
+    if(features)
+      ret[strlen(ret) - 3] = '\0';
   }
-
-  snprintf(ret, sizeof ret, str);
-  if(status & aie_PLACEHOLDER)
-    snprintf(ret, sizeof ret - strlen(ret) - 1, ", Placeholder");
 
   return ret;
 }
