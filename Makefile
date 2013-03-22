@@ -19,10 +19,10 @@ FORMATS_OBJECTS += $(FORMATS_SOURCES:.c=.o)
 
 OBJECTS = $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
 
-.PHONY: all debug release static_lib dynamic_lib core formats test
+.PHONY: all debug release static_lib dynamic_lib core formats test runtest
 .PHONY: clean cleantest cleandist
 
-all: static_lib dynamic_lib
+all: static_lib dynamic_lib test
 
 debug: clean cleandist
 	$(MAKE) BUILD=debug all
@@ -38,17 +38,17 @@ core: $(MAIN_OBJECTS)
 
 formats: $(FORMATS_OBJECTS)
 
-test: all
+test: static_lib dynamic_lib
 	$(MAKE) -C test/ all
 
 runtest: all
 	$(MAKE) -C test/ run
 
 $(STATIC_LIB): $(OBJECTS)
-	ar -rcuv $@ $?
+	$(AR) -rcuv $@ $?
 
 $(DYNAMIC_LIB): $(OBJECTS)
-	ld -Bshareable -o $@ $(OBJECTS)
+	$(CC) -shared -fpic -o $@ $(OBJECTS)
 
 $(FORMATS_OBJECTS): $(MAIN_OBJECTS)
 
