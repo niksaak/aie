@@ -42,11 +42,12 @@ void* aie_malloc(size_t size);
 void* aie_realloc(void* pointer, size_t size);
     // convenient wrapper around realloc()
 
-int aie_strtoks(char* string, int delim, char** dest, size_t count);
+int aie_strtoks(const char* string, char* delims,
+                const char* dest[], size_t count);
     // put pointers to substrings of 'string' delimited by 'delim' to 'dest',
     // 'count' pointers at most. return count of pointers
 
 char* aie_tokcpy(char* dest, const char* src, int delim, size_t size);
     // copy string 'src' until first occurance of 'delim' to dest,
-    // 'size' bytes at most. returns dest
+    // 'size' bytes at most. returns 'dest'
 

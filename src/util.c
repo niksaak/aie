@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -88,7 +89,13 @@ void* aie_realloc(void* pointer, size_t size)
   return pointer;
 }
 
-int aie_strtoks(char* string, int delim, char** dest, size_t count)
+static bool findin(int c, char* chars)
+{ // there was a great function, but now there's just a wrapper T___T
+  return strchr(chars, c) != NULL;
+}
+
+int aie_strtoks(const char* string, char* delims,
+                const char* dest[], size_t count)
 {
   int i = 0;
   int j = 0;
@@ -96,9 +103,11 @@ int aie_strtoks(char* string, int delim, char** dest, size_t count)
 
   dest[j++] = string;
 
-  for(; i < len && j <= count; i++)
-    if(string[i] == delim && string[i + 1] != delim)
+  for(; i < len && j <= count; i++) {
+    if(findin(string[i], delims) && !findin(string[i + 1], delims)) {
       dest[j++] = &string[i + 1];
+    }
+  }
 
   return j;
 }
