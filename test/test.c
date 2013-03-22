@@ -56,20 +56,20 @@ void archive_filename(void)
 void strtoks_delim_at_end(void)
 {
   char str[] = "delimiting space at the end of the string ";
-  char* toks[9] = {NULL};
+  const char* toks[9] = {NULL};
   int tokc = 0;
 
-  tokc = aie_strtoks(str, ' ', toks, 9);
+  tokc = aie_strtoks(str, " ", toks, 9);
 
-  ASSERT(*toks[tokc - 1] == '\0');
+  ASSERT(!strcmp(toks[tokc - 1], "string "));
 }
 
 void strtoks_many_delim(void)
 {
   char str[] = "many   delimiters";
-  char* toks[9] = {NULL};
+  const char* toks[9] = {NULL};
 
-  aie_strtoks(str, ' ', toks, 9);
+  aie_strtoks(str, " ", toks, 9);
 
   ASSERT(!strcmp(toks[1], "delimiters"));
 }
@@ -100,18 +100,27 @@ int main(int argc, char** argv)
   test_summary();
 
 
-  puts("\nNow real action - printing archive contents...");
-  {
+  if(failedc == 0) {
     const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
     aie_Archive* arc = fmt->open("script.rus");
 
+    puts("\nNow real action - printing archive contents...");
     printf("Formatter features: [%s]\n", aie_arcfmt_featurestr(fmt));
     printf("Contents of %s:\n", arc->files->name);
+
+    /*
     for(int i = 0; i < arc->table->unitc; i++) {
       puts(arc->table->unitv[i].name);
     }
+    */
+
+    for(int i = 0; i < arc->table->unitc; i++) {
+      const aie_ArcUnit* aru = aie_arctable_get(arc->table, i);
+      printf("%s %ziB\n", aru->name, aie_arcsegment_sizesum(aru->segments));
+    }
+
+    puts("Done?");
   }
-  puts("Done?");
 
   return 0;
 }
