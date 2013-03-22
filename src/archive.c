@@ -175,6 +175,17 @@ int aie_arcsegment_destroy(aie_ArcUnitSegment** list)
   return aie_arcsegment_destroy(&cdr);
 }
 
+size_t aie_arcsegment_sizesum(const aie_ArcUnitSegment* list)
+{
+  size_t sum = 0;
+
+  for(const aie_ArcUnitSegment* seg = list; seg != NULL; seg = seg->next) {
+    sum += seg->size;
+  }
+
+  return sum;
+}
+
 // ArcFile
 
 aie_ArcFile* aie_arcfile_push(FILE* file, const char* name, int role,

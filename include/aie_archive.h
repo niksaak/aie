@@ -128,6 +128,9 @@ aie_ArcUnitSegment* aie_arcsegment_push(aie_ArcFile* file,
 int aie_arcsegment_destroy(aie_ArcUnitSegment** list);
     // destroy segments list
 
+size_t aie_arcsegment_sizesum(const aie_ArcUnitSegment* list);
+    // return sum of sizes of all the segments in list
+
 // ArcFile
 
 aie_ArcFile* aie_arcfile_push(FILE* file,
