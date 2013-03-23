@@ -7,7 +7,7 @@ DYNAMIC_LIB := lib/lib$(NAME).so
 CFLAGS += -Wall -std=c99 -pedantic -Iinclude/ -fpic
 
 ifeq ($(BUILD), debug)
-  CFLAGS += -g -O0 -DDEBUG_MODE
+  CFLAGS += -O0 -g3 -DDEBUG_MODE
 else ifeq ($(BUILD), release)
   CFLAGS += -O3
 endif
