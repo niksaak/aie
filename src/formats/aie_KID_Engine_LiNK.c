@@ -21,24 +21,14 @@ typedef struct arc_entry_t {
   char fname[24];
 } arc_entry_t;
 
-aie_Archive* create(const char* name) { return NULL; } // FIXME
-bool extract(aie_Archive* archive) { return false; } // FIXME
-
-aie_Archive* open(const char* name)
+aie_Archive* open(FILE* file, const char* name, const char* opt)
 {
-  FILE* file = fopen(name, "r");
   aie_Archive* arc = aie_mkarchive(&KID_Engine_LiNK, NULL, NULL);
   struct arc_header_t header;
   struct arc_entry_t entry;
+  size_t arc_offset;
 
   aie_arcfile_push(file, name, 0, &arc->files);
-
-  if(file == NULL) {
-    AIE_WARN("Unable to open file '%s'.", name);
-    return NULL;
-  }
-
-  errno = 0;
 
   if(!fread(&header, sizeof header, 1, file) || feof(file) || ferror(file)) {
     AIE_ERROR("Unable to read from '%s'", name);
@@ -50,7 +40,7 @@ aie_Archive* open(const char* name)
     return NULL;
   }
 
-  size_t arc_offset = header.fcount * sizeof entry + sizeof header;
+  arc_offset = header.fcount * sizeof entry + sizeof header;
 
   for(size_t i = 0; i < header.fcount; i++) {
     aie_ArcUnitSegment* seg = NULL;
@@ -80,8 +70,12 @@ aie_ArcFormat KID_Engine_LiNK = // format description
   .filename_len     = 24,
   .drv_version      = 20130224,
 
+  .deduce           = NULL,
   .open             = &open,
-  .create           = &create,
-  .extract          = &extract,
+  .open_opt         = NULL,
+  .create           = NULL,     // TODO
+  .create_opt       = NULL,
+  .extract          = NULL,     // TODO
+  .extract_opt      = NULL
 };
 

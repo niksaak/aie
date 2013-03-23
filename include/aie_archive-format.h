@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>
 
@@ -17,14 +18,31 @@ typedef enum aie_ArcFormatFeatures
   aie_FMTPlaceholder = 0x0020
 } aie_ArcFormatFeatures;
 
-typedef struct aie_Archive* (*aie_ArcOpenFun)(const char* name);
+typedef bool
+(*aie_ArcDeduceFun)(FILE* file, const char* name);
+    // pointer to function that returns true if file is an archive of
+    // right format
+
+typedef struct aie_Archive*
+(*aie_ArcOpenFun)(FILE* file, const char* name, const char* opt);
     // pointer to function that opens archive
 
-typedef struct aie_Archive* (*aie_ArcCreateFun)(const char* name);
+typedef struct
+aie_Archive* (*aie_ArcCreateFun)(char* target, char** files, const char* opt);
     // pointer to function that creates archive
 
-typedef bool (*aie_ArcExtractFun)(struct aie_Archive* archive);
+typedef bool
+(*aie_ArcExtractFun)(struct aie_Archive* archive, char* target);
     // pointer to function that extracts archive
+
+typedef struct aie_ArcFormatOpt
+{ // formater option and it's description.
+  char opt[3]; // character and one or two ':' with meaning as in getopt
+  char* description; // description, can be used for outputting help
+} aie_ArcFormatOpt;
+
+static const struct aie_ArcFormatOpt aie_fmt_optend = {{0},NULL};
+    // you'd better not forget to terminate your opts array with this
 
 typedef struct aie_ArcFormat
 { // Archive format description
@@ -37,9 +55,16 @@ typedef struct aie_ArcFormat
   size_t filename_len;          // max filename len
   uint32_t drv_version;         // version in format 0xYYYYmmdd
 
+  aie_ArcDeduceFun deduce;
+
   aie_ArcOpenFun open;
+  struct aie_ArcFormatOpt* open_opt;
+
   aie_ArcCreateFun create;
+  struct aie_ArcFormatOpt* create_opt;
+
   aie_ArcExtractFun extract;
+  struct aue_ArcFormatOpt* extract_opt;
 
 } aie_ArcFormat;
 

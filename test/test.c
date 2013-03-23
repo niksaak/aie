@@ -13,18 +13,11 @@ void arcfmt_select(void)
   ASSERT(fmt->id == aie_ARC_KID_ENGINE_LINK);
 }
 
-void archive_open_unexistent(void)
-{
-  const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-  aie_Archive* archive = fmt->open("fdsfgds");
-
-  ASSERT(archive == NULL);
-}
-
 void archive_open(void)
 {
   const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-  aie_Archive* archive = fmt->open("script.rus");
+  aie_Archive* archive =
+    fmt->open(fopen("script.rus", "r"), "script.rus", NULL);
 
   ASSERT(archive != NULL);
 }
@@ -32,7 +25,8 @@ void archive_open(void)
 void archive_kill(void)
 {
   const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-  aie_Archive* archive = fmt->open("script.rus");
+  aie_Archive* archive =
+    fmt->open(fopen("script.rus", "r"), "script.rus", NULL);
 
   ASSERT(!aie_kmarchive(archive));
 }
@@ -40,17 +34,10 @@ void archive_kill(void)
 void archive_files_nonNULL(void)
 {
   const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-  aie_Archive* archive = fmt->open("script.rus");
+  aie_Archive* archive =
+    fmt->open(fopen("script.rus", "r"), "srcipt.rus", NULL);
 
   ASSERT(archive->files != NULL);
-}
-
-void archive_filename(void)
-{
-  const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-  aie_Archive* archive = fmt->open("script.rus");
-
-  ASSERT(!strcmp(archive->files->name, "script.rus"));
 }
 
 void strtoks_delim_at_end(void)
@@ -89,11 +76,9 @@ void tokcpy_sane(void)
 int main(int argc, char** argv)
 {
   TEST(arcfmt_select);
-  TEST(archive_open_unexistent);
   TEST(archive_open);
   TEST(archive_kill);
   TEST(archive_files_nonNULL);
-  TEST(archive_filename);
   TEST(strtoks_delim_at_end);
   TEST(strtoks_many_delim);
   TEST(tokcpy_sane);
@@ -102,17 +87,12 @@ int main(int argc, char** argv)
 
   if(failedc == 0) {
     const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-    aie_Archive* arc = fmt->open("script.rus");
+    FILE* file = fopen("script.rus", "r");
+    aie_Archive* arc = fmt->open(file, "script.rus", NULL);
 
     puts("\nNow real action - printing archive contents...");
     printf("Formatter features: [%s]\n", aie_arcfmt_featurestr(fmt));
     printf("Contents of %s:\n", arc->files->name);
-
-    /*
-    for(int i = 0; i < arc->table->unitc; i++) {
-      puts(arc->table->unitv[i].name);
-    }
-    */
 
     for(int i = 0; i < arc->table->unitc; i++) {
       const aie_ArcUnit* aru = aie_arctable_get(arc->table, i);
