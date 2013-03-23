@@ -32,8 +32,7 @@ typedef struct aie_ArcFormat
   const char* name;             // formatter name
   unsigned subformat_num;       // number of subformats
   const char* subformat_names;  // subformat names, colon separated
-  const char* arc_ext;          // file extensions for archive, space separated
-  const char* meta_ext;         // file extensions for metadata
+  const char* ext;              // file extensions for archive, space separated
   enum aie_ArcFormatFeatures features;
   size_t filename_len;          // max filename len
   uint32_t drv_version;         // version in format 0xYYYYmmdd

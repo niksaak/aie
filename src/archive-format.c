@@ -31,10 +31,7 @@ const char* aie_arcfmt_extensions(const aie_ArcFormat* format)
 {
   static char extensions[512] = {0};
 
-  strncat(extensions, format->arc_ext, sizeof extensions - 1);
-  sprintf(extensions, " ");
-  strncat(extensions, format->meta_ext,
-          sizeof extensions - strlen(extensions));
+  strncat(extensions, format->ext, sizeof extensions - 1);
 
   return extensions;
 }
