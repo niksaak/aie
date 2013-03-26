@@ -113,9 +113,8 @@ unsigned aie_arcunit_compressed_size(const aie_ArcUnit* unit);
 aie_ArcUnitSegment* aie_arcunit_segments(aie_ArcUnit* unit);
     // get segments list from 'unit'
 
-bool
-aie_arcunit_getflags(const aie_ArcUnit* unit, aie_ArcUnitFlags flags);
-    // return true if flags is set
+int aie_arcunit_flags(const aie_ArcUnit* unit);
+    // return flags for unit. Same as unit->flags
 
 // ArcUnitSegment
 

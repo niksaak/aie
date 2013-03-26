@@ -11,8 +11,8 @@
 
 // Archive
 
-aie_Archive* aie_mkarchive(
-    aie_ArcFormat* format, aie_ArcUnitTable* table, aie_ArcFile* files)
+aie_Archive* aie_mkarchive(aie_ArcFormat* format,
+    aie_ArcUnitTable* table, aie_ArcFile* files)
 {
   aie_Archive* arc = aie_malloc(sizeof (aie_Archive));
 
@@ -139,9 +139,9 @@ aie_ArcUnitSegment* aie_arcunit_segments(aie_ArcUnit* unit)
   return unit->segments;
 }
 
-bool aie_arcunit_getflags(const aie_ArcUnit* unit, aie_ArcUnitFlags flags)
+int aie_arcunit_flags(const aie_ArcUnit* unit)
 {
-  return (unit->flags & flags) == flags;
+  return unit->flags;
 }
 
 // ArcUnitSegment
