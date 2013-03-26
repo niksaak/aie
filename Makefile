@@ -52,12 +52,13 @@ $(DYNAMIC_LIB): $(OBJECTS)
 
 $(FORMATS_OBJECTS): $(MAIN_OBJECTS)
 
-clean:
+clean: cleantest
+	@-$(RM) -v $(OBJECTS) ; \
+	  $(RM) -v $(STATIC_LIB) $(DYNAMIC_LIB)
+
+cleanmost:
 	@-$(RM) -v $(OBJECTS)
 
 cleantest:
 	$(MAKE) -C test/ clean cleandist
-
-cleandist: cleantest
-	@-$(RM) -v $(STATIC_LIB) $(DYNAMIC_LIB)
 
