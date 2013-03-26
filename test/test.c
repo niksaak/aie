@@ -22,15 +22,6 @@ void archive_open(void)
   ASSERT(archive != NULL);
 }
 
-void archive_kill(void)
-{
-  const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-  aie_Archive* archive =
-    fmt->open(fopen("script.rus", "r"), "script.rus", NULL);
-
-  ASSERT(!aie_kmarchive(archive));
-}
-
 void archive_files_nonNULL(void)
 {
   const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
@@ -77,7 +68,6 @@ int main(int argc, char** argv)
 {
   TEST(arcfmt_select);
   TEST(archive_open);
-  TEST(archive_kill);
   TEST(archive_files_nonNULL);
   TEST(strtoks_delim_at_end);
   TEST(strtoks_many_delim);
