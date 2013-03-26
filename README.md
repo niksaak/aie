@@ -4,7 +4,8 @@
 There shall be rewrite of dsp2003's [*AE - VN Tools*][vn-tools] archive
 manipulator in C.
 
-Current version: **0.00+0.01i** <br />
-Working on: *rethinking project structure, adding convenient utilities*
+Current version: **0.03+0.09i** <br />
+Working on: *figuring out external interface for library users,
+cleanups*
 
-[vn-tools]: http://wks.4otaku.ru/ae.php?p=dl "AE"
+[vn-tools]: http://wks.arai-kibou.ru/ae.php?p=dl "AE"
