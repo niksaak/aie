@@ -8,13 +8,16 @@
 
 #include <aie_util.h>
 
-void promulgate(aie_PromulgationLevel level, const char* file, const char* func,
-    const char* promulgation, ...)
+static aie_PromulgationCallback promul_cb = NULL;
+
+void aie_promulgate(aie_PromulgationLevel level,
+    const char* file, const char* func, const char* promulgation, ...)
 {
-  static char debug_str[] = "DEBUG";
+  static char debug_str[] =   "  DEBUG";
+  static char message_str[] = "       ";
   static char warning_str[] = "WARNING";
-  static char error_str[] = "ERROR";
-  static char panic_str[] = "PANIC";
+  static char error_str[] =   "  ERROR";
+  static char panic_str[] =   "  PANIC";
   char* str = NULL;
   va_list va_args;
 
@@ -22,6 +25,9 @@ void promulgate(aie_PromulgationLevel level, const char* file, const char* func,
   {
     case aie_PROMUL_DEBUG:
       str = debug_str;
+      break;
+    case aie_PROMUL_MESSAGE:
+      str = message_str;
       break;
     case aie_PROMUL_WARNING:
       str = warning_str;
@@ -43,11 +49,21 @@ void promulgate(aie_PromulgationLevel level, const char* file, const char* func,
 
   fputc('\n', stderr);
 
+  AIE_FUNCALL(promul_cb, level, file, func, promulgation);
+
   if(level == aie_PROMUL_PANIC)
     exit(EXIT_FAILURE);
 }
 
-int ran_domo(int min, int max)
+void aie_set_promulgation_callback(aie_PromulgationCallback fun)
+{
+  if(promul_cb != NULL) {
+    AIE_WARN("Resetting promulgation callback.");
+  }
+  promul_cb = fun;
+}
+
+int aie_ran_domo(int min, int max)
 {
   int domo = rand();
   int range = max - min;
@@ -55,11 +71,11 @@ int ran_domo(int min, int max)
   int bucket = RAND_MAX / range;
 
   if(domo == RAND_MAX)
-    return ran_domo(min, max);
+    return aie_ran_domo(min, max);
 
   if(domo < RAND_MAX - rem)
     return min + domo / bucket;
-  return ran_domo(min, max);
+  return aie_ran_domo(min, max);
 }
 
 void* aie_malloc(size_t size)
@@ -97,8 +113,8 @@ static bool findin(int c, char* chars)
 int aie_strtoks(const char* string, char* delims,
                 const char* dest[], size_t count)
 {
-  int i = 0;
-  int j = 0;
+  unsigned i = 0;
+  unsigned j = 0;
   size_t len = strlen(string);
 
   dest[j++] = string;
@@ -115,7 +131,7 @@ int aie_strtoks(const char* string, char* delims,
 char* aie_tokcpy(char* dest, const char* src, int delim, size_t size)
 {
   size_t len = strlen(src);
-  int i = 0;
+  unsigned i = 0;
 
   for(; i < len && i < size && src[i] != delim; i++)
     dest[i] = src[i];
