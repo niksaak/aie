@@ -4,7 +4,7 @@ BUILD := debug
 STATIC_LIB := lib/lib$(NAME).a
 DYNAMIC_LIB := lib/lib$(NAME).so
 
-CFLAGS += -Wall -std=c99 -pedantic -Iinclude/ -fpic
+CFLAGS += -std=c99 -Iinclude/ -fpic -Wall -pedantic -Wmissing-prototypes 
 
 ifeq ($(BUILD), debug)
   CFLAGS += -O0 -g3 -DDEBUG_MODE
