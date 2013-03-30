@@ -3,7 +3,6 @@
 
 #include <aie_archive-kinds.h>
 #include <aie_archive-format.h>
-#include <aie_formats.h>
 
 const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
 {

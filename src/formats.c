@@ -1,8 +1,8 @@
-#include <aie_formats.h>
+#include <aie_archive-format.h>
 
 #include "formats/aie_KID_Engine_LiNK.h"
 
-aie_ArcFormat unsupp =
+aie_ArcFormat unsupported_format =
 { .id = aie_ARC_UNSUPPORTED,
   .name = "Unsupported format",
   .subformat_num = 0,
@@ -19,5 +19,5 @@ aie_ArcFormat unsupp =
 const aie_ArcFormat * const aie_arcformats[] =
 {
   &KID_Engine_LiNK,
-  &unsupp
+  &unsupported_format
 };

@@ -21,7 +21,23 @@ typedef struct arc_entry_t {
   char fname[24];
 } arc_entry_t;
 
-aie_Archive* open(FILE* file, const char* name, const char* opt)
+static int test(FILE* file, const char* name)
+{
+  struct arc_header_t header = {{0}};
+
+  if(!fread(&header, sizeof header, 1, file) || feof(file) || ferror(file)) {
+    AIE_ERROR("Unable to read from '%s'", name);
+    return -1;
+  }
+  if(strncmp(header.magic, "LNK", 4)) {
+    AIE_DEBUG("%s is not of format 'KID Engine LiNK'");
+    return 0;
+  }
+
+  return 1;
+}
+
+static aie_Archive* open(FILE* file, const char* name, const char* opt)
 {
   aie_Archive* arc = aie_mkarchive(&KID_Engine_LiNK, NULL, NULL);
   struct arc_header_t header;
@@ -31,11 +47,7 @@ aie_Archive* open(FILE* file, const char* name, const char* opt)
   aie_arcfile_push(file, name, 0, &arc->files);
 
   if(!fread(&header, sizeof header, 1, file) || feof(file) || ferror(file)) {
-    AIE_ERROR("Unable to read from '%s'", name);
-    aie_kmarchive(arc);
-    return NULL;
-  } else if(strncmp(header.magic, "LNK", 4)) {
-    AIE_DEBUG("file %s is not of format \"KID Engine LiNK\"");
+    AIE_ERROR("Unable to read header from '%s'", name);
     aie_kmarchive(arc);
     return NULL;
   }
@@ -46,7 +58,7 @@ aie_Archive* open(FILE* file, const char* name, const char* opt)
     aie_ArcUnitSegment* seg = NULL;
 
     if(!fread(&entry, sizeof entry, 1, file) || feof(file) || ferror(file)) {
-      AIE_ERROR("Unable to read from '%s'", name);
+      AIE_ERROR("Unable to read entry from '%s'", name);
       aie_kmarchive(arc);
       return NULL;
     }
@@ -62,7 +74,7 @@ aie_Archive* open(FILE* file, const char* name, const char* opt)
 aie_ArcFormat KID_Engine_LiNK = // format description
 {
   .id               = aie_ARC_KID_ENGINE_LINK,
-  .name             = "KID Engine LiNK",
+  .name             = "KID-Engine-LiNK",
   .subformat_num    = 0,
   .subformat_names  = NULL,
   .ext              = "dat",
@@ -70,7 +82,7 @@ aie_ArcFormat KID_Engine_LiNK = // format description
   .filename_len     = 24,
   .drv_version      = 20130224,
 
-  .deduce           = NULL,
+  .test             = &test,
   .open             = &open,
   .open_opt         = NULL,
   .create           = NULL,     // TODO

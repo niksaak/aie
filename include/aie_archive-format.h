@@ -18,10 +18,10 @@ typedef enum aie_ArcFormatFeatures
   aie_FMTPlaceholder = 0x0020
 } aie_ArcFormatFeatures;
 
-typedef bool
-(*aie_ArcDeduceFun)(FILE* file, const char* name);
-    // pointer to function that returns true if file is an archive of
-    // right format
+typedef int
+(*aie_ArcTestFun)(FILE* file, const char* name);
+    // pointer to function that returns integer greater than 0 if the file is
+    // of rigth format, equal if it is not and lesser on error
 
 typedef struct aie_Archive*
 (*aie_ArcOpenFun)(FILE* file, const char* name, const char* opt);
@@ -55,7 +55,7 @@ typedef struct aie_ArcFormat
   size_t filename_len;          // max filename len
   uint32_t drv_version;         // version in format 0xYYYYmmdd
 
-  aie_ArcDeduceFun deduce;
+  aie_ArcTestFun test;
 
   aie_ArcOpenFun open;
   struct aie_ArcFormatOpt* open_opt;
@@ -67,6 +67,8 @@ typedef struct aie_ArcFormat
   struct aue_ArcFormatOpt* extract_opt;
 
 } aie_ArcFormat;
+
+extern const aie_ArcFormat* const aie_arcformats[];
 
 const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind);
     // get format for archives of kind

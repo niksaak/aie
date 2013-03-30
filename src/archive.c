@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <aie_formats.h>
+#include <aie_archive-format.h>
 #include <aie_archive.h>
 #include <aie_util.h>
 #include <aie_fibonacci.h>
