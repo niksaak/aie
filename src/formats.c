@@ -1,23 +1,8 @@
 #include <aie_archive-format.h>
 
-#include "formats/aie_KID_Engine_LiNK.h"
-
-aie_ArcFormat unsupported_format =
-{ .id = aie_ARC_UNSUPPORTED,
-  .name = "Unsupported format",
-  .subformat_num = 0,
-  .subformat_names = NULL,
-  .ext = NULL,
-  .features = 0,
-  .filename_len = 0,
-  .drv_version = 0,
-  .open = NULL,
-  .create = NULL,
-  .extract = NULL
-};
+#include "formats/kid-engine-link.h"
 
 const aie_ArcFormat * const aie_arcformats[] =
 {
-  &KID_Engine_LiNK,
-  &unsupported_format
+  &KID_Engine_LiNK
 };

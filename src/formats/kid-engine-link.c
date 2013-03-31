@@ -7,7 +7,7 @@
 #include <aie_archive.h>
 #include <aie_util.h>
 
-#include "aie_KID_Engine_LiNK.h"
+#include "kid-engine-link.h"
 
 typedef struct arc_header_t {
   char magic[4];

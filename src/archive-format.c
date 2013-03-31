@@ -11,7 +11,7 @@ const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
       return aie_arcformats[i];
   }
 
-  return aie_arcfmt(aie_ARC_UNSUPPORTED);
+  return NULL;
 }
 
 const char* aie_arcfmt_name(const aie_ArcFormat* format)

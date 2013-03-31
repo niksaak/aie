@@ -27,12 +27,12 @@ typedef struct aie_Archive*
 (*aie_ArcOpenFun)(FILE* file, const char* name, const char* opt);
     // pointer to function that opens archive
 
-typedef struct
-aie_Archive* (*aie_ArcCreateFun)(char* target, char** files, const char* opt);
+typedef struct aie_Archive* 
+(*aie_ArcCreateFun)(const char* target, char** files, const char* opt);
     // pointer to function that creates archive
 
-typedef bool
-(*aie_ArcExtractFun)(struct aie_Archive* archive, char* target);
+typedef int
+(*aie_ArcExtractFun)(const char* target, struct aie_Archive* archive);
     // pointer to function that extracts archive
 
 typedef struct aie_ArcFormatOpt
@@ -40,9 +40,6 @@ typedef struct aie_ArcFormatOpt
   char opt[3]; // character and one or two ':' with meaning as in getopt
   char* description; // description, can be used for outputting help
 } aie_ArcFormatOpt;
-
-static const struct aie_ArcFormatOpt aie_fmt_optend = {{0},NULL};
-    // you'd better not forget to terminate your opts array with this
 
 typedef struct aie_ArcFormat
 { // Archive format description
@@ -68,7 +65,11 @@ typedef struct aie_ArcFormat
 
 } aie_ArcFormat;
 
+static const struct aie_ArcFormatOpt aie_fmt_optend = {{0},NULL};
+    // you'd better not forget to terminate your opts array with this
+
 extern const aie_ArcFormat* const aie_arcformats[];
+    // array of pointers to formatter descriptions
 
 const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind);
     // get format for archives of kind
@@ -84,7 +85,7 @@ const char* aie_arcfmt_extensions(const aie_ArcFormat* format);
     // get string listing acceptable fileextensions for 'format'
     // space separated, or NULL if archives of this format
     // can not be recognized by fileextension.
-    // WARNING: returns static string which is modified on each call
+    // WARNING: returns pointer to static string which is modified on each call
 
 aie_ArcFormatFeatures aie_arcfmt_features(const aie_ArcFormat* format);
     // get formatter features
