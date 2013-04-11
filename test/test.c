@@ -1,10 +1,13 @@
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 
 #include <aie_archive.h>
 #include <aie_archive-kinds.h>
 
 #include "test_util.h"
+
+char arcname[] = "script.rus";
 
 void arcfmt_select(void)
 {
@@ -16,8 +19,9 @@ void arcfmt_select(void)
 void archive_open(void)
 {
   const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-  aie_Archive* archive =
-    fmt->open(fopen("script.rus", "r"), "script.rus", NULL);
+  FILE* file = fopen(arcname, "r");
+
+  aie_Archive* archive = fmt->open(file, arcname, NULL);
 
   ASSERT(archive != NULL);
 }
@@ -25,8 +29,9 @@ void archive_open(void)
 void archive_files_nonNULL(void)
 {
   const aie_ArcFormat* fmt = aie_arcfmt(aie_ARC_KID_ENGINE_LINK);
-  aie_Archive* archive =
-    fmt->open(fopen("script.rus", "r"), "srcipt.rus", NULL);
+  FILE* file = fopen(arcname, "r");
+
+  aie_Archive* archive = fmt->open(file, arcname, NULL);
 
   ASSERT(archive->files != NULL);
 }

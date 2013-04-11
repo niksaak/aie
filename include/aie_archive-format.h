@@ -18,11 +18,6 @@ typedef enum aie_ArcFormatFeatures
   aie_FMTPlaceholder = 0x0020
 } aie_ArcFormatFeatures;
 
-typedef int
-(*aie_ArcTestFun)(FILE* file, const char* name);
-    // pointer to function that returns integer greater than 0 if the file is
-    // of rigth format, equal if it is not and lesser on error
-
 typedef struct aie_Archive*
 (*aie_ArcOpenFun)(FILE* file, const char* name, const char* opt);
     // pointer to function that opens archive
@@ -51,8 +46,6 @@ typedef struct aie_ArcFormat
   enum aie_ArcFormatFeatures features;
   size_t filename_len;          // max filename len
   uint32_t drv_version;         // version in format 0xYYYYmmdd
-
-  aie_ArcTestFun test;
 
   aie_ArcOpenFun open;
   struct aie_ArcFormatOpt* open_opt;

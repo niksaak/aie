@@ -27,7 +27,7 @@ static int test(FILE* file, const char* name)
 
   if(!fread(&header, sizeof header, 1, file) || feof(file) || ferror(file)) {
     AIE_ERROR("Unable to read from '%s'", name);
-    return -1;
+    return 0;
   }
   if(strncmp(header.magic, "LNK", 4)) {
     AIE_DEBUG("%s is not of format 'KID Engine LiNK'");
@@ -44,7 +44,13 @@ static aie_Archive* open(FILE* file, const char* name, const char* opt)
   struct arc_entry_t entry;
   size_t arc_offset;
 
+  if(!test(file, name)) {
+    aie_kmarchive(arc);
+    return NULL;
+  }
+
   aie_arcfile_push(file, name, 0, &arc->files);
+  rewind(file);
 
   if(!fread(&header, sizeof header, 1, file) || feof(file) || ferror(file)) {
     AIE_ERROR("Unable to read header from '%s'", name);
@@ -82,7 +88,6 @@ aie_ArcFormat KID_Engine_LiNK = // format description
   .filename_len     = 24,
   .drv_version      = 20130224,
 
-  .test             = &test,
   .open             = &open,
   .open_opt         = NULL,
   .create           = NULL,     // TODO
