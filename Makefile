@@ -53,7 +53,7 @@ $(DYNAMIC_LIB): $(OBJECTS)
 $(FORMATS_OBJECTS): $(MAIN_OBJECTS)
 
 clean: cleantest
-	@-$(RM) -v $(OBJECTS) ; \
+	@-$(RM) -v $(OBJECTS) ;\
 	  $(RM) -v $(STATIC_LIB) $(DYNAMIC_LIB)
 
 cleanmost:
@@ -61,4 +61,23 @@ cleanmost:
 
 cleantest:
 	$(MAKE) -C test/ clean cleandist
+
+help:
+	@echo "libaie 0.03+0.09i" ;\
+	 echo "===================" ;\
+	 echo "Acceptable targets:" ;\
+	 echo "  all         make everytrhing" ;\
+	 echo "  debug       clean everything and make with BUILD=debug" ;\
+	 echo "              (this is the default for now)";\
+	 echo "  release     clean everything and make with BUILD=release" ;\
+	 echo "  static_lib  make static lib" ;\
+	 echo "  dynamic_lib make dynamic lib" ;\
+	 echo "  test        make tests" ;\
+	 echo "  runtest     make and run tests" ;\
+	 echo "  core        compile core library objects" ;\
+	 echo "  formats     compile formatters objects" ;\
+	 echo "  clean       clean everything" ;\
+	 echo "  cleanmost   clean everything but libraries" ;\
+	 echo "  cleantest   clean tests" ;\
+	 echo
 
