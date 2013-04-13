@@ -6,7 +6,7 @@
 
 const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind)
 {
-  for(size_t i = 0; i <= (aie_ARC_FORMAT_KIND_MAX); i++) {
+  for(size_t i = 0; i <= (aie_ARC_KIND_MAX); i++) {
     if(aie_arcformats[i]->id == kind)
       return aie_arcformats[i];
   }

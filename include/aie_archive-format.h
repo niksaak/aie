@@ -27,7 +27,8 @@ typedef struct aie_Archive*
     // pointer to function that creates archive
 
 typedef int
-(*aie_ArcExtractFun)(const char* target, struct aie_Archive* archive);
+(*aie_ArcExtractFun)(const struct aie_Archive* archive, const char* target,
+                     const char* opt);
     // pointer to function that extracts archive
 
 typedef struct aie_ArcFormatOpt
