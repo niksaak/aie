@@ -15,3 +15,5 @@ allocation method for other structures;
 + implement simple errno-like error-handling mechanism though accepting custom
 error strings;
 + create basis for future multilanguage support.
+
+[vn-tools]: http://wks.arai-kibou.ru/ae.php?p=dl "AE"
