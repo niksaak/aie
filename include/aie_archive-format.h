@@ -19,67 +19,71 @@ typedef enum aie_ArcFormatFeatures
 } aie_ArcFormatFeatures;
 
 typedef struct aie_Archive*
-(*aie_ArcOpenFun)(FILE* file, const char* name, const char* opt);
+(*aie_ArcOpenF)(FILE* file, const char* name, const char* opt);
     // pointer to function that opens archive
 
 typedef struct aie_Archive* 
-(*aie_ArcCreateFun)(const char* target, char** files, const char* opt);
+(*aie_ArcCreateF)(char** files, const char* target, const char* opt);
     // pointer to function that creates archive
 
 typedef int
-(*aie_ArcExtractFun)(const struct aie_Archive* archive, const char* target,
-                     const char* opt);
+(*aie_ArcExtractF)(const struct aie_Archive* archive, const char* target,
+                   const char* opt);
     // pointer to function that extracts archive
 
-typedef struct aie_ArcFormatOpt
-{ // formater option and it's description.
-  char opt[3]; // character and one or two ':' with meaning as in getopt
-  char* description; // description, can be used for outputting help
-} aie_ArcFormatOpt;
+typedef int
+(*aie_ArcUnitExtractF)(const aie_ArcUnit* unit, const char* target,
+                       const char* opt);
+    // pointer to function that extracts unit.
+    // target can be filename, in which case unit must be extracted to
+    // file with that name, or directory, in which case unit must be extracted
+    // to file in that directory named unit->name
+
+typedef int
+(*aie_ArcUnitMemExtractF)(const aie_ArcUnit* unit,
+                          char* buf, size_t offset, size_t size,
+                          const char* opt);
+    // pointer to function that extracts unit to buffer in memory.
+    // offset is an offset from start of unit and size is maximum of bytes
+    // which can be written to buf
 
 typedef struct aie_ArcFormat
 { // Archive format description
   aie_ArcFormatKind id;         // identifier.
   const char* name;             // formatter name
+  enum aie_ArcFormatFeatures features;
+
   unsigned subformat_num;       // number of subformats
   const char* subformat_names;  // subformat names, colon separated
   const char* ext;              // file extensions for archive, space separated
-  enum aie_ArcFormatFeatures features;
   size_t filename_len;          // max filename len
   uint32_t drv_version;         // version in format 0xYYYYmmdd
 
-  aie_ArcOpenFun open;
-  struct aie_ArcFormatOpt* open_opt;
-
-  aie_ArcCreateFun create;
-  struct aie_ArcFormatOpt* create_opt;
-
-  aie_ArcExtractFun extract;
-  struct aue_ArcFormatOpt* extract_opt;
+  aie_ArcOpenF open;
+  aie_ArcCreateF create;
+  aie_ArcExtractF extract;
+  aie_ArcUnitExtractF uextract;
+  aie_ArcUnitMemExtractF umextract;
 
 } aie_ArcFormat;
-
-static const struct aie_ArcFormatOpt aie_fmt_optend = {{0},NULL};
-    // you'd better not forget to terminate your opts array with this
 
 extern const aie_ArcFormat* const aie_arcformats[];
     // array of pointers to formatter descriptions
 
-const aie_ArcFormat* aie_arcfmt(aie_ArcFormatKind kind);
+aie_ArcFormat aie_arcfmt(aie_ArcFormatKind kind);
     // get format for archives of kind
 
 const char* aie_arcfmt_name(const aie_ArcFormat* format);
     // get format name
 
 const char* aie_arcfmt_subformats(const aie_ArcFormat* format);
-    // get string listing subformats of format, or NULL
+    // get string listing subformats of format, colon separated, or NULL
     // if there is no subformats.
 
 const char* aie_arcfmt_extensions(const aie_ArcFormat* format);
     // get string listing acceptable fileextensions for 'format'
     // space separated, or NULL if archives of this format
     // can not be recognized by fileextension.
-    // WARNING: returns pointer to static string which is modified on each call
 
 aie_ArcFormatFeatures aie_arcfmt_features(const aie_ArcFormat* format);
     // get formatter features
