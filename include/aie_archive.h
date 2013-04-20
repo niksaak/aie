@@ -23,7 +23,7 @@ typedef struct aie_ArcSegment
 } aie_ArcUnitSegment;
 
 typedef struct aie_ArcSegmentCons
-{
+{ // Forms list of aie_ArcSegments
   struct aie_ArcSegment car;
   struct aie_ArcSegment* cdr;
 } aie_ArcSegmentCons;
@@ -31,7 +31,7 @@ typedef struct aie_ArcSegmentCons
 typedef struct aie_ArcUnit
 { // Archive allocaton unit, represents one file in archive
   char* name;                   // unit name, freeable
-  struct aie_ArcSegmentCons* segments; // file segmentation
+  struct aie_ArcSegmentCons* segments; // unit segmentation
   size_t size;                  // uncompressed size
   aie_ArcUnitFlags flags;       // unit flags, ORed
 } aie_ArcUnit;
@@ -44,14 +44,14 @@ typedef struct aie_ArcUnitTable
 } aie_ArcUnitTable;
 
 typedef struct aie_ArcFile
-{ // Represents part of archive, can form linked list
+{ // Represents archive volume
   FILE* file;                   // file descriptor
   char* name;                   // full filename, freeable
   int role;                     // file role
 } aie_ArcFile;
 
 typedef struct aie_ArcFileCons
-{
+{ // Forms list of aie_ArcFiles
   struct aie_ArcFile car;
   struct aie_ArcFile* cdr;
 } aie_ArcFileCons;
@@ -75,6 +75,7 @@ inline aie_Archive aie_mkarchive(aie_ArcFormat* format,
 
 int aie_kmarchive(aie_Archive* archive);
     // deinitialize archive and its contents
+
 
 // ArcUnitTable
 
