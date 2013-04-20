@@ -22,7 +22,7 @@ typedef struct aie_Archive*
 (*aie_ArcOpenF)(FILE* file, const char* name, const char* opt);
     // pointer to function that opens archive
 
-typedef struct aie_Archive* 
+typedef struct aie_Archive*
 (*aie_ArcCreateF)(char** files, const char* target, const char* opt);
     // pointer to function that creates archive
 
@@ -39,13 +39,15 @@ typedef int
     // file with that name, or directory, in which case unit must be extracted
     // to file in that directory named unit->name
 
-typedef int
+typedef size_t
 (*aie_ArcUnitMemExtractF)(const aie_ArcUnit* unit,
                           char* buf, size_t offset, size_t size,
                           const char* opt);
-    // pointer to function that extracts unit to buffer in memory.
-    // offset is an offset from start of unit and size is maximum of bytes
-    // which can be written to buf
+    // pointer to function that extracts unit to memory buffer.
+    // offset is offset from start of unit and size is maximum of bytes
+    // which can be written to buf.
+    // Return value is index of next unwritten byte or amount of bytes written
+    // if EOF is encountered.
 
 typedef struct aie_ArcFormat
 { // Archive format description
