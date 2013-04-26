@@ -2,26 +2,26 @@
 
 #include <aie_archive.h>
 
-aie_Archive*
-aie_arcopen(FILE* file, const char* name, aie_ArcFormatKind kind,
-            const char* opt);
+aie_Archive aie_arcopen(aie_ArcFile file, aie_ArcFormatKind kind,
+                        const char* opt);
     // try to open archive assuming it is of kind or, if kind < 0, deducing
     // its kind with aie_arcdeduce()
 
-aie_Archive*
-aie_arcmake(const char* target, char** pathnames, aie_ArcFormatKind kind,
-            const char* opt);
-    // make archive at the target directory from pathnames
+aie_Archive aie_arccreate(const char* target, char** pathnames,
+                          aie_ArcFormatKind kind, const char* opt);
+    // create archive file from pathnames
 
-int aie_arcextract(const aie_Archive* archive, const char* target, const char* opt);
+int aie_arcextract(const aie_Archive* archive, const char* target,
+                   const char* opt);
     // extract archive to the target directory
 
 int aie_arc_uextract(const aie_ArcUnit* unit, const aie_ArcFormat* fmt,
                      const char* target, const char* opt);
     // extract unit of format fmt to target.
     // Target can be filename, in which case unit will be extracted to file of
-    // such name, or directory, in which case it will be extracted to file in
-    // that directory named unit->name.
+    // such name, directory, in which case it will be extracted to file in
+    // that directory named unit->name, or NULL, in which case unit will be
+    // extracted to stdout
 
 size_t aie_arc_umextract(const aie_ArcUnit* unit, const aie_ArcFormat* fmt,
                          char* buf, size_t offset, size_t size,

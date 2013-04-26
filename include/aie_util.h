@@ -17,6 +17,9 @@ inline void* aie_free(void* pointer)
   return NULL;
 }
 
+char* aie_mkstring(const char* format, ...);
+    // returns pointer to static string with formatted string
+
 int aie_strtoks(const char* string, char* delims,
                 const char* dest[], size_t count);
     // put pointers to substrings of 'string' delimited by 'delim' to 'dest',

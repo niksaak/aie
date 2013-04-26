@@ -1,24 +1,51 @@
 #pragma once
 
+#include <stdarg.h>
+
+#define AIE_MESSAGE(string) \
+  aie_error(aie_EUSR, aie_ELMessage, __func__, string)
+
+#define AIE_WARNING(errno, datum) \
+  aie_error(errno, aie_ELWarning, __func__, datum)
+
+#define AIE_ERROR(errno, datum) \
+  aie_error(errno, aie_ELError, __func__, datum)
+
+#define AIE_PANIC(errno, datum) \
+  aie_error(errno, aie_ELPanic, __func__, datum)
+
 typedef enum aie_Errno {
-  aie_OK, // No error
+  aie_ESUCCESS, // No error
   aie_EERRNO, // Error is determined by errno
+  aie_ENOWAY, // Function is not implemented
+  aie_ENURUPO, // Null pointer error
   aie_EFORMAT, // Unrecognized format
   aie_EHEADER, // Bad header
   aie_EOFFSET, // Bad offsets
-  aie_ESIZE, // Incorrect size
+  aie_EINTEGRITY, // Questionable integrity
+  aie_EENCRYPTION, // Encryption error
+  aie_EUSR, // User error i.e. custom message
   aie_EUNKNOWN = -1 // Unknown error
 } aie_Errno;
 
+typedef enum aie_ErrorLevel {
+  aie_ELMessage, // message, mostly for use with EUSR
+  aie_ELWarning, // warning, warn but proceed as usual
+  aie_ELError, // error, serious business, breaks loops, pillages villages
+  aie_ELPanic // panic, cease all work and exit, failure
+} aie_ErrorLevel;
+
 typedef struct aie_Error {
   aie_Errno e;
-  char* file;
-  char* info;
+  aie_ErrorLevel level;
+  char* function;
+  char* datum;
 } aie_Error;
 
 typedef void (*aie_ErrorHandlerF)(aie_Error error);
 
-void aie_error(aie_Errno e, char* file, char* info);
+void aie_error(aie_Errno e, aie_ErrorLevel level,
+               char* function, char* datum);
     // set error possibly supplying additional information
 
 aie_Error aie_geterror(void);
@@ -30,3 +57,5 @@ aie_ErrorHandlerF aie_set_error_handler(aie_ErrorHandlerF fun);
 char* aie_errstr(aie_Errno e);
     // get string representation for err
 
+extern const aie_ErrorHandlerF aie_tacit_error_handler;
+extern const aie_ErrorHandlerF aie_default_error_handler;
