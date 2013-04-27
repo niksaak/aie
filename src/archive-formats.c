@@ -2,7 +2,7 @@
 
 #include "formats/kid-engine-link.h"
 
-const aie_ArcFormat * const aie_arcformats[] =
+const aie_ArcFormat aie_arcformats[] =
 {
-  &KID_Engine_LiNK
+  KID_Engine_LiNK
 };

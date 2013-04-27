@@ -1,3 +1,5 @@
+#include "kid-engine-link.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -6,8 +8,6 @@
 
 #include <aie_archive.h>
 #include <aie_util.h>
-
-#include "kid-engine-link.h"
 
 typedef struct arc_header_t {
   char magic[4];
@@ -77,7 +77,7 @@ static aie_Archive* open(FILE* file, const char* name, const char* opt)
   return arc;
 }
 
-aie_ArcFormat KID_Engine_LiNK = // format description
+aie_ArcFormat kid_engine_link = // format description
 {
   .id               = aie_ARC_KID_ENGINE_LINK,
   .name             = "KID-Engine-LiNK",
@@ -89,10 +89,7 @@ aie_ArcFormat KID_Engine_LiNK = // format description
   .drv_version      = 20130224,
 
   .open             = &open,
-  .open_opt         = NULL,
   .create           = NULL,     // TODO
-  .create_opt       = NULL,
   .extract          = NULL,     // TODO
-  .extract_opt      = NULL
 };
 
