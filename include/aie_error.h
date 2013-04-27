@@ -14,6 +14,12 @@
 #define AIE_PANIC(errno, datum) \
   aie_error(errno, aie_ELPanic, __func__, datum)
 
+#define AIE_WITH_ERROR_HOOK(var) \
+  var = aie_set_error_hook(var);
+
+#define AIE_WITH_ERROR_HOOK_END(var) \
+  aie_set_error_hook(var);
+
 typedef enum aie_Errno {
   aie_ESUCCESS, // No error
   aie_EERRNO, // Error is determined by errno
@@ -42,7 +48,7 @@ typedef struct aie_Error {
   char* datum;
 } aie_Error;
 
-typedef void (*aie_ErrorHandlerF)(aie_Error error);
+typedef void (*aie_ErrorHookF)(aie_Error error);
 
 void aie_error(aie_Errno e, aie_ErrorLevel level,
                char* function, char* datum);
@@ -51,11 +57,11 @@ void aie_error(aie_Errno e, aie_ErrorLevel level,
 aie_Error aie_geterror(void);
     // get last error
 
-aie_ErrorHandlerF aie_set_error_handler(aie_ErrorHandlerF fun);
-    // set error handler to be called by aie_error()
+aie_ErrorHookF aie_set_error_hook(aie_ErrorHookF fun);
+    // set error hook to be called by aie_error()
 
 char* aie_errstr(aie_Errno e);
     // get string representation for err
 
-extern const aie_ErrorHandlerF aie_tacit_error_handler;
-extern const aie_ErrorHandlerF aie_default_error_handler;
+extern const aie_ErrorHookF aie_tacit_error_hook;
+extern const aie_ErrorHookF aie_default_error_hook;
