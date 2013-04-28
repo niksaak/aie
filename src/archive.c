@@ -1,219 +1,216 @@
+#include <aie_archive.h>
+
 #include <stdlib.h>
 #include <string.h>
 
-#include <aie_archive-format.h>
-#include <aie_archive.h>
+#include <aie_archive-formats.h>
+#include <aie_error.h>
 #include <aie_util.h>
 #include <aie_fibonacci.h>
 
-#define TABLE_UNITS_DEFAULT 256
-    // default quantity of preallocated units for aie_aloarctable();
+#define ARCTABLE_DEFAULT_SIZE 128
 
-// Archive
 
-aie_Archive* aie_mkarchive(aie_ArcFormat* format,
-    aie_ArcUnitTable* table, aie_ArcFile* files)
+// ArcFormat:
+
+aie_ArcFormat aie_arcfmt(aie_ArcFormatKind kind)
 {
-  aie_Archive* arc = aie_malloc(sizeof (aie_Archive));
+  if(kind >= aie_ARCFORMATS_COUNT) {
+    AIE_ERROR(aie_EINDEX, aie_mkstring("%i", kind));
+    return aie_ARCFMTNIL;
+  }
 
-  arc->fmt = format;
-  arc->table = table;
-  arc->files = files;
+  aie_ArcFormat fmt = *aie_arcformats[kind];
 
-  return arc;
+  if(fmt.id == kind) return fmt;
+
+  for(int i = 0; i < aie_ARC_KIND_COUNT; i++) {
+    fmt = *aie_arcformats[i];
+    if(fmt.id == kind) return fmt;
+  }
+
+  AIE_ERROR(aie_EFORMAT, NULL);
+  return aie_ARCFMTNIL;
 }
+
+extern inline char* aie_arcfmt_name(const aie_ArcFormat* format);
+
+extern inline char* aie_arcfmt_subformats(const aie_ArcFormat* format);
+
+extern inline char* aie_arcfmt_extensions(const aie_ArcFormat* format);
+
+extern inline aie_ArcFormatFeatures
+aie_arcfmt_features(const aie_ArcFormat* format);
+
+extern inline size_t aie_arcfmt_namelen(const aie_ArcFormat* format);
+
+extern inline uint32_t aie_arcfmt_ver(const aie_ArcFormat* format);
+
+// Archive:
+// aie_ArcFormat* fmt
+// aie_ArcUnitTable* table
+// aie_ArcFileCons* files
+
+extern inline aie_Archive aie_mkarchive(aie_ArcFormat* format,
+    aie_ArcUnitTable* table, aie_ArcFileCons* files);
 
 int aie_kmarchive(aie_Archive* archive)
 {
-  aie_kmarctable(archive->table);
-  aie_arcfile_destroy(&archive->files);
-  free(archive);
+  if(archive->table != NULL) aie_kmarctable(archive->table);
+  if(archive->files != NULL) aie_arcfile_list_destroy(&archive->files);
+  *archive = aie_ARCNIL;
 
   return 0;
 }
 
-const aie_ArcFormat* aie_arch_fmt(const aie_Archive* hive)
+
+// ArcUnitTable:
+// size_t unitc
+// size_t allocc
+// aie_ArcUnit unitv[]
+
+aie_ArcUnitTable* aie_mkarctable(size_t size)
 {
-  return hive->fmt;
-}
+  if(size == 0) size = ARCTABLE_DEFAULT_SIZE;
+  size_t allocc = size * sizeof (aie_ArcUnit) + sizeof (aie_ArcUnitTable);
+  aie_ArcUnitTable *table = aie_malloc(allocc);
 
-aie_ArcUnitTable* aie_arch_table(aie_Archive* hive)
-{
-  return hive->table;
-}
+  table->unitc = 0;
+  table->allocc = allocc;
 
-aie_ArcFile* aie_arch_parts(aie_Archive* hive)
-{
-  return hive->files;
-}
-
-// ArcUnitTable
-
-aie_ArcUnitTable* aie_mkarctable(unsigned units_count)
-{
-  unsigned quantity = units_count ? units_count : TABLE_UNITS_DEFAULT;
-  size_t units_alloc = quantity * sizeof (aie_ArcUnit);
-  aie_ArcUnitTable* aut = aie_malloc(sizeof (aie_ArcUnitTable) + units_alloc);
-
-  aut->unitc = 0;
-  aut->allocated = sizeof (aie_ArcUnitTable) + units_alloc;
-
-  return aut;
+  return table;
 }
 
 int aie_kmarctable(aie_ArcUnitTable* table)
 {
-  for(size_t i = 0; i < table->unitc; i++)
-    aie_arcunit_clean(&table->unitv[i]);
+  if(table == NULL)
+    AIE_WARNING(aie_ENURUPO, "table");
+  for(int i = 0; i < table->unitc; i++)
+    free(table->unitv[i].name);
   free(table);
 
   return 0;
 }
 
-aie_ArcUnit* aie_arctable_get(aie_ArcUnitTable* table, size_t index)
-{
-  return &table->unitv[index];
-}
+extern inline aie_ArcUnit aie_arctable_get(aie_ArcUnitTable* table,
+    size_t index);
 
-aie_ArcUnit* aie_arctable_unitv(aie_ArcUnitTable* table)
+size_t aie_arctable_put(aie_ArcUnit unit, aie_ArcUnitTable** table)
 {
-  return table->unitv;
-}
-
-size_t aie_arctable_put(const char* name, aie_ArcUnitSegment* segments,
-    size_t size, aie_ArcUnitFlags flags, aie_ArcUnitTable** table)
-{
-  if(*table == NULL) {
+  if(*table == NULL)
     *table = aie_mkarctable(0);
+  unit.name = strdup(unit.name);
+
+  size_t index = (*table)->unitc++;
+  size_t allocc = (*table)->unitc * sizeof unit + sizeof **table;
+
+  if(allocc > (*table)->allocc) {
+    long fib = aie_nextfib((*table)->allocc);
+
+    *table = aie_realloc(*table, sizeof **table + fib - fib % sizeof unit);
   }
 
-  char* namestr = aie_malloc(strlen(name) + 1);
-  size_t index = (*table)->unitc;
-  size_t new_count = (*table)->unitc + 1;
-  aie_ArcUnit* unit = &(*table)->unitv[index];
+  (*table)->unitv[index] = unit;
 
-  if(new_count * sizeof unit > (*table)->allocated) {
-    unsigned fib = aie_nextfib((*table)->allocated);
-
-    *table =
-      aie_realloc(*table, sizeof (aie_ArcUnitTable) + fib - fib % sizeof *unit);
-  }
-
-  unit->name = strncpy(namestr, name, strlen(name) + 1);
-  unit->segments = segments;
-  unit->size = size;
-  unit->flags = flags;
-
-  return ++(*table)->unitc;
+  return index;
 }
+
 
 // ArcUnit
+// char* name
+// aie_ArcSegmentCons* segments
+// size_t size
+// aie_ArcUnitFlags flags
 
-int aie_arcunit_clean(aie_ArcUnit* unit)
+extern inline aie_ArcUnit aie_mkarcunit(char* name,
+    aie_ArcSegmentCons* segments, size_t size, aie_ArcUnitFlags flags);
+
+extern inline int aie_kmarcunit(aie_ArcUnit* unit);
+
+
+// ArcSegment
+// aie_ArcFile* file
+// size_t offset
+// size_t size
+
+extern inline aie_ArcSegment aie_mkarcsegment(aie_ArcFile* file, size_t offset,
+    size_t size);
+
+extern inline int aie_kmarcsegment(aie_ArcSegment* segment);
+
+aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
+    aie_ArcSegmentCons** list)
 {
-  free(unit->name);
-  unit->name = NULL;
-  aie_arcsegment_destroy(&unit->segments);
+  AIE_ASSERT(list != NULL, NULL);
 
-  return 0;
-}
-
-const char* aie_arcunit_name(const aie_ArcUnit* unit)
-{
-  return unit->name;
-}
-
-unsigned aie_arcunit_uncompressed_size(const aie_ArcUnit* unit)
-{
-  return unit->size;
-}
-
-unsigned aie_arcunit_compressed_size(const aie_ArcUnit* unit)
-{
-  // FIXME or even REMOVEME
-  return -1;
-}
-
-aie_ArcUnitSegment* aie_arcunit_segments(aie_ArcUnit* unit)
-{
-  return unit->segments;
-}
-
-int aie_arcunit_flags(const aie_ArcUnit* unit)
-{
-  return unit->flags;
-}
-
-// ArcUnitSegment
-
-aie_ArcUnitSegment* aie_arcsegment_push(aie_ArcFile* file,
-    size_t offset, size_t size, aie_ArcUnitSegment** list)
-{
-  aie_ArcUnitSegment* aus = aie_malloc(sizeof (aie_ArcUnitSegment));
-
-  aus->file = file;
-  aus->offset = offset;
-  aus->size = size;
-  aus->next = *list;
-  *list = aus;
-
-  return aus;
-}
-
-int aie_arcsegment_destroy(aie_ArcUnitSegment** list)
-{
-  static aie_ArcUnitSegment* cdr = NULL;
-      // static because ai am not sure about this befriending TCO otherwise
-
-  if(*list == NULL)
-    return 0;
-
-  cdr = (*list)->next;
-  free(*list);
-  *list = NULL;
-
-  return aie_arcsegment_destroy(&cdr);
-}
-
-size_t aie_arcsegment_sizesum(const aie_ArcUnitSegment* list)
-{
-  size_t sum = 0;
-
-  for(const aie_ArcUnitSegment* seg = list; seg != NULL; seg = seg->next) {
-    sum += seg->size;
+  if(*list == NULL) {
+    *list = aie_malloc(sizeof (aie_ArcSegmentCons));
+    **list = (aie_ArcSegmentCons){ segment, NULL };
+    return *list;
   }
 
-  return sum;
+  return aie_arcsegment_push(segment, &(*list)->cdr);
 }
+
+int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list)
+{
+  AIE_ASSERT((list != NULL), 1);
+
+  if(*list == NULL) {
+    return 0;
+  }
+
+  aie_ArcSegmentCons* cdr = (*list)->cdr;
+  *list = aie_free(*list);
+
+  return aie_arcsegment_list_destroy(&cdr);
+}
+
+size_t aie_arcsegment_sumsize(aie_ArcSegmentCons* list)
+{
+  if(list == NULL) {
+    return 0;
+  }
+
+  return list->car.size + aie_arcsegment_sumsize(list->cdr);
+}
+
 
 // ArcFile
+// FILE* file
+// char* name
+// int role
 
-aie_ArcFile* aie_arcfile_push(FILE* file, const char* name, int role,
-                              aie_ArcFile** list)
+extern inline aie_ArcFile aie_mkarcfile(FILE* file, char* name, int role);
+
+extern inline int aie_kmarcfile(aie_ArcFile* file);
+
+aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
 {
-  aie_ArcFile* arf = aie_malloc(sizeof (aie_ArcFile));
-  char* namestr = aie_malloc(strlen(name) + 1);
+  AIE_ASSERT(list != NULL, NULL);
 
-  arf->file = file;
-  arf->name = strncpy(namestr, name, strlen(name) + 1);
-  arf->role = role;
-  arf->next = *list;
-  *list = arf;
+  file.name = strdup(file.name);
+  if(*list == NULL) {
+    *list = aie_malloc(sizeof (aie_ArcFileCons));
+    **list = (aie_ArcFileCons){ file, NULL };
+    return *list;
+  }
 
-  return arf;
+  return aie_arcfile_push(file, &(*list)->cdr);
 }
 
-int aie_arcfile_destroy(aie_ArcFile** list)
+int aie_arcfile_list_destroy(aie_ArcFileCons** list)
 {
-  static aie_ArcFile* cdr = NULL;
+  AIE_ASSERT(list != NULL, 1);
 
-  if(*list == NULL)
+  if(*list == NULL) {
     return 0;
+  }
 
-  cdr = (*list)->next;
-  free(*list);
-  *list = NULL;
+  aie_ArcFileCons* cdr = (*list)->cdr;
+  free((*list)->car.name);
+  *list = aie_free(*list);
 
-  return aie_arcfile_destroy(&cdr);
+  return aie_arcfile_list_destroy(&cdr);
 }
 

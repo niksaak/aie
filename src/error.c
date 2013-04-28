@@ -11,8 +11,8 @@ static void tacit_hook_f(aie_Error e)
 
 static void default_hook_f(aie_Error e)
 {
-  char* errname = aie_errstr(e);
-  char errlvl[8] = {0};
+  char* errname = aie_errstr(e.e);
+  char* errlvl = "???";
 
   switch(e.level) {
     case aie_ELMessage: errlvl = "MSG"; break;
@@ -31,12 +31,17 @@ static void default_hook_f(aie_Error e)
 const aie_ErrorHookF aie_tacit_error_hook = &tacit_hook_f;
 const aie_ErrorHookF aie_default_error_hook = &default_hook_f;
 
-aie_ErrorHookF hook = aie_tacit_error_hook;
+aie_ErrorHookF hook = &default_hook_f;
 
 void aie_error(aie_Errno e, aie_ErrorLevel level,
-               char* function, char* datum)
+               const char* function, char* datum)
 {
   err = (aie_Error){ e, level, function, datum };
+}
+
+void aie_esuccess(const char* func)
+{
+  err = (aie_Error){ aie_ESUCCESS, 0, func, NULL };
 }
 
 aie_Error aie_geterror(void)
@@ -59,9 +64,9 @@ aie_ErrorHookF aie_set_error_hook(aie_ErrorHookF fun)
 
 char* aie_errstr(aie_Errno e)
 {
-  switch(e.errno) {
+  switch(e) {
     case aie_ESUCCESS: return "Success";
-    case aie_ERRNO: return strerror(errno);
+    case aie_EERRNO: return strerror(errno);
     case aie_ENOWAY: return "Function not implemented";
     case aie_ENURUPO: return "Null pointer";
     case aie_EFORMAT: return "Unrecognized format";
@@ -69,6 +74,8 @@ char* aie_errstr(aie_Errno e)
     case aie_EOFFSET: return "Bad offset";
     case aie_EINTEGRITY: return "Questionamble integrity";
     case aie_EENCRYPTION: return "Encryption";
+    case aie_EINDEX: return "Bad index";
+    case aie_EASSERT: return "Assertion failed";
     case aie_EUSR: return "User message";
     case aie_EUNKNOWN: return "Unknown error";
     default: return "???";

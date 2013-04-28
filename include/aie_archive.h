@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <aie_archive-kinds.h>
+#include <aie_error.h>
 #include <aie_util.h>
 
 // Types:
@@ -32,7 +33,7 @@ typedef struct aie_ArcSegment
 typedef struct aie_ArcSegmentCons
 { // Forms list of aie_ArcSegments
   struct aie_ArcSegment car;
-  struct aie_ArcSegment* cdr;
+  struct aie_ArcSegmentCons* cdr;
 } aie_ArcSegmentCons;
 
 typedef struct aie_ArcUnit
@@ -46,7 +47,7 @@ typedef struct aie_ArcUnit
 typedef struct aie_ArcUnitTable
 { // Archive allocation table
   size_t unitc;                 // units count;
-  size_t allocated;
+  size_t allocc;                // bytes allocated;
   aie_ArcUnit unitv[];          // units array;
 } aie_ArcUnitTable;
 
@@ -60,16 +61,18 @@ typedef struct aie_ArcFile
 typedef struct aie_ArcFileCons
 { // Forms list of aie_ArcFiles
   struct aie_ArcFile car;
-  struct aie_ArcFile* cdr;
+  struct aie_ArcFileCons* cdr;
 } aie_ArcFileCons;
 
 typedef struct aie_Archive
 (*aie_ArcOpenF)(struct aie_ArcFile file, const char* opt);
     // pointer to function that opens archive
 
+/*
 typedef struct aie_Archive
 (*aie_ArcCreateF)(const char* target, char** files, const char* opt);
     // pointer to function that creates archive
+*/
 
 typedef int
 (*aie_ArcExtractF)(const struct aie_Archive* archive, const char* target,
@@ -107,7 +110,7 @@ typedef struct aie_ArcFormat
   uint32_t drv_version;         // version in format 0xYYYYmmdd
 
   aie_ArcOpenF open;
-  aie_ArcCreateF create;
+  // aie_ArcCreateF create;
   aie_ArcExtractF extract;
   aie_ArcUnitExtractF uextract;
   aie_ArcUnitMemExtractF umextract;
@@ -124,20 +127,10 @@ typedef struct aie_Archive
 
 // ArcFormat:
 
-extern const aie_ArcFormat* const aie_arcformats[];
-    // array of pointers to formatter descriptions
+static const aie_ArcFormat aie_ARCFMTNIL = {0};
 
-inline aie_ArcFormat aie_arcfmt(aie_ArcFormatKind kind)
-{   // get format for archives of kind
-  int i;
-
-  for(i = 0; i < aie_ARC_KIND_COUNT; i++) {
-    aie_ArcFormat fmt = *aie_arcformats[i];
-    if(fmt.id == kind)
-      return fmt;
-  }
-  return (aie_ArcFormat){ .id = -1 };
-}
+aie_ArcFormat aie_arcfmt(aie_ArcFormatKind kind);
+    // get format of kind
 
 inline char* aie_arcfmt_name(const aie_ArcFormat* format)
 {   // get format name
@@ -174,6 +167,8 @@ inline uint32_t aie_arcfmt_ver(const aie_ArcFormat* format)
 
 // Archive:
 
+static const aie_Archive aie_ARCNIL = { 0, 0, 0 };
+
 inline aie_Archive aie_mkarchive(aie_ArcFormat* format,
                                  aie_ArcUnitTable* table,
                                  aie_ArcFileCons* files)
@@ -183,8 +178,6 @@ inline aie_Archive aie_mkarchive(aie_ArcFormat* format,
 
 int aie_kmarchive(aie_Archive* archive);
     // deinitialize archive and its contents
-
-static const aie_Archive aie_ARCNIL = { 0, 0, 0 };
 
 
 // ArcUnitTable
@@ -196,12 +189,16 @@ aie_ArcUnitTable* aie_mkarctable(size_t size);
 int aie_kmarctable(aie_ArcUnitTable* table);
     // deallocate table and its units
 
-inline aie_ArcUnit* aie_arctable_get(aie_ArcUnitTable* table, size_t index)
+inline aie_ArcUnit aie_arctable_get(aie_ArcUnitTable* table, size_t index)
 {
-  return index < table->unitc ? &table->unitv[index] : NULL;
+  if(index >= table->unitc) {
+    AIE_ERROR(aie_EINDEX, aie_mkstring("%z", index));
+    return (aie_ArcUnit){0};
+  }
+  return table->unitv[index];
 }
 
-size_t aie_arctable_put(aie_ArcUnit unit, aie_ArcUnitTable* table);
+size_t aie_arctable_put(aie_ArcUnit unit, aie_ArcUnitTable** table);
     // put unit into table;
     // unit.name will be duplicated to heap
 
@@ -225,17 +222,20 @@ inline int aie_kmarcunit(aie_ArcUnit* unit)
 
 // ArcSegment:
 
-inline struct aie_ArcSegment aie_mkarcsegment(aie_ArcFile* file,
-                                              size_t offset,
-                                              size_t size)
+inline aie_ArcSegment aie_mkarcsegment(aie_ArcFile* file,
+                                       size_t offset,
+                                       size_t size)
 {
   return (aie_ArcSegment){ file, offset, size };
 }
 
-int aie_kmarcsegment(aie_ArcSegment* segment);
-    // set segment fields to default values
+inline int aie_kmarcsegment(aie_ArcSegment* segment)
+{   // set segment fields to default values
+  *segment = (aie_ArcSegment){ 0, 0, 0 };
+  return 0;
+}
 
-aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment* segment,
+aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
                                         aie_ArcSegmentCons** list);
     // push segment to list
 
@@ -248,17 +248,18 @@ size_t aie_arcsegment_sumsize(aie_ArcSegmentCons* list);
 
 // ArcFile:
 
-inline aie_ArcFile aie_mkarcfile(FILE* file,
-                                 char* name,
-                                 int role)
+inline aie_ArcFile aie_mkarcfile(FILE* file, char* name, int role)
 {
   return (aie_ArcFile){ file, name, role };
 }
 
-int aie_kmarcfile(aie_ArcSegment* segment);
+inline int aie_kmarcfile(aie_ArcFile* file)
+{
+  *file = (aie_ArcFile){ 0, 0, 0 };
+  return 0;
+}
 
-aie_ArcFileCons* aie_arcfile_push(aie_ArcFile* segment,
-                                  aie_ArcFileCons** list);
+aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list);
     // push file to list
 
 int aie_arcfile_list_destroy(aie_ArcFileCons** list);

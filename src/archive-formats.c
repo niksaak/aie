@@ -1,8 +1,10 @@
-#include <aie_archive-format.h>
+#include <aie_archive-formats.h>
 
 #include "formats/kid-engine-link.h"
 
-const aie_ArcFormat aie_arcformats[] =
+const aie_ArcFormat const * aie_arcformats[] =
 {
-  KID_Engine_LiNK
+  &kid_engine_link
 };
+
+const int aie_ARCFORMATS_COUNT = sizeof aie_arcformats / sizeof (void *);

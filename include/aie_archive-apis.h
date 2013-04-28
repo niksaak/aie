@@ -7,9 +7,11 @@ aie_Archive aie_arcopen(aie_ArcFile file, aie_ArcFormatKind kind,
     // try to open archive assuming it is of kind or, if kind < 0, deducing
     // its kind with aie_arcdeduce()
 
-aie_Archive aie_arccreate(const char* target, char** pathnames,
+/*
+aie_Archive aie_arccreate(aie_ArcFile file, char** pathnames,
                           aie_ArcFormatKind kind, const char* opt);
     // create archive file from pathnames
+*/
 
 int aie_arcextract(const aie_Archive* archive, const char* target,
                    const char* opt);

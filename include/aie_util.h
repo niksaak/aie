@@ -20,12 +20,16 @@ inline void* aie_free(void* pointer)
 char* aie_mkstring(const char* format, ...);
     // returns pointer to static string with formatted string
 
-int aie_strtoks(const char* string, char* delims,
-                const char* dest[], size_t count);
-    // put pointers to substrings of 'string' delimited by 'delim' to 'dest',
-    // 'count' pointers at most. return count of pointers
+inline long aie_roundtol(long num, long divisor)
+{
+  return num - num % divisor;
+}
 
-char* aie_tokcpy(char* dest, const char* src, int delim, size_t size);
-    // copy string 'src' until first occurance of 'delim' to dest,
-    // 'size' bytes at most. returns 'dest'
+#if !(_SVID_SOURCE || _BSD_SOURCE || _XOPEN_SOURCE >= 500 || \
+      _XOPEN_SOURCE && _XOPEN_SOURCE_EXTENDED || _POSIX_C_SOURCE >= 200809L)
+#define AIE_OWN_STRDUP 1
+
+char* strdup(const char* s);
+
+#endif
 

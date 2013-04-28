@@ -1,3 +1,5 @@
 #pragma once
 
-extern aie_ArcFormat KID_Engine_LiNK;
+#include <aie_archive.h>
+
+extern aie_ArcFormat kid_engine_link;

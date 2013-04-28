@@ -14,11 +14,40 @@
 #define AIE_PANIC(errno, datum) \
   aie_error(errno, aie_ELPanic, __func__, datum)
 
+#define AIE_WASSERT(assertion)                                      \
+  do {                                                              \
+    if(!(assertion))                                                \
+      aie_error(aie_EASSERT, aie_ELWarning, __func__, #assertion);  \
+  } while(0)
+
+#define AIE_ASSERT(assertion, ret)                                \
+  do {                                                            \
+    if(!(assertion)) {                                            \
+      aie_error(aie_EASSERT, aie_ELError, __func__, #assertion);  \
+      return ret;                                                 \
+    }                                                             \
+  } while(0)
+
+#define AIE_PASSERT(assertion, ret)                               \
+  do {                                                            \
+    if(!(assertion)) {                                            \
+      aie_error(aie_EASSERT, aie_ELPanic, __func__, #assertion);  \
+      return ret;                                                 \
+    }                                                             \
+  } while(0)
+
+#define AIE_ERETURN(val)                  \
+  if(aie_geterror().level >= aie_ELError) \
+    return val
+
+#define AIE_ERESET() \
+  aie_esuccess(__func__)
+
 #define AIE_WITH_ERROR_HOOK(var) \
-  var = aie_set_error_hook(var);
+  var = aie_set_error_hook(var)
 
 #define AIE_WITH_ERROR_HOOK_END(var) \
-  aie_set_error_hook(var);
+  aie_set_error_hook(var)
 
 typedef enum aie_Errno {
   aie_ESUCCESS, // No error
@@ -30,6 +59,8 @@ typedef enum aie_Errno {
   aie_EOFFSET, // Bad offsets
   aie_EINTEGRITY, // Questionable integrity
   aie_EENCRYPTION, // Encryption error
+  aie_EINDEX, // Bad index
+  aie_EASSERT, // Assertion failed
   aie_EUSR, // User error i.e. custom message
   aie_EUNKNOWN = -1 // Unknown error
 } aie_Errno;
@@ -44,15 +75,18 @@ typedef enum aie_ErrorLevel {
 typedef struct aie_Error {
   aie_Errno e;
   aie_ErrorLevel level;
-  char* function;
+  const char* function;
   char* datum;
 } aie_Error;
 
 typedef void (*aie_ErrorHookF)(aie_Error error);
 
 void aie_error(aie_Errno e, aie_ErrorLevel level,
-               char* function, char* datum);
+               const char* function, char* datum);
     // set error possibly supplying additional information
+
+void aie_esuccess(const char* func);
+    // reset error
 
 aie_Error aie_geterror(void);
     // get last error

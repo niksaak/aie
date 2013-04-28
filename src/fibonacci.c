@@ -1,8 +1,8 @@
-#define AIE_FIBONACCI_ARR_LEN 42
-
 #include <aie_fibonacci.h>
 
-unsigned long aie_fibnums[AIE_FIBONACCI_ARR_LEN] =
+#define AIE_FIBONACCI_ARR_LEN 42
+
+long aie_fibnums[AIE_FIBONACCI_ARR_LEN] =
 { // lookup table for aie_fib() function
   0,
   1,
@@ -64,7 +64,7 @@ long aie_fib(int n)
 
 long aie_nextfib(long n)
 {
-  unsigned i = 0;
+  int i = 0;
 
   while(++i) {
     long f = aie_fib(i);
@@ -78,7 +78,7 @@ long aie_nextfib(long n)
 
 long aie_prevfib(long n)
 {
-  unsigned i = 0;
+  int i = 0;
   long prev = 0;
 
   while(++i) {
