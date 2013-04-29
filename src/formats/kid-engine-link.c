@@ -1,97 +1,82 @@
 #include "kid-engine-link.h"
 
-/* FIXME: rewrite me!
 #include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
 #include <inttypes.h>
-#include <errno.h>
+#include <string.h>
 
 #include <aie_archive.h>
-#include <aie_util.h>
+#include <aie_archive-kinds.h>
 
-typedef struct arc_header_t {
+static aie_Archive open(aie_ArcFile file, const char* opt);
+
+aie_ArcFormat kid_engine_link =
+{
+  .id = aie_ARC_KID_ENGINE_LINK,
+  .name = "KID-Engine-LiNK",
+  .features = aie_FMTUnsafe,
+  .subformat_names = NULL,
+  .ext = "dat",
+  .filename_len = 24,
+  .version = "2013-04-30",
+
+  .open = &open,
+  .extract = NULL,
+  .uextract = NULL,
+  .umextract = NULL
+};
+
+typedef struct header_t {
   char magic[4];
   uint32_t fcount;
   uint64_t dummy;
-} arc_header_t;
+} header_t;
 
-typedef struct arc_entry_t {
+typedef struct entry_r {
   uint32_t offset;
-  uint32_t fsize2;
-  char fname[24];
-} arc_entry_t;
+  uint32_t size2;
+  char name[24];
+} entry_t;
 
-static int test(FILE* file, const char* name)
-{
-  struct arc_header_t header = {{0}};
+static aie_Archive open(aie_ArcFile file, const char* opt)
+{ // TODO: check archive integrity
+  AIE_ASSERT(file.file != NULL, aie_ARCNIL);
 
-  if(!fread(&header, sizeof header, 1, file) || feof(file) || ferror(file)) {
-    AIE_ERROR("Unable to read from '%s'", name);
-    return 0;
+  header_t header = {{0}};
+
+  if(!fread(&header, sizeof header, 1, file.file)) {
+    AIE_ERROR(aie_EERRNO, file.name);
+    return aie_ARCNIL;
   }
-  if(strncmp(header.magic, "LNK", 4)) {
-    AIE_DEBUG("%s is not of format 'KID Engine LiNK'");
-    return 0;
-  }
-
-  return 1;
-}
-
-static aie_Archive* open(FILE* file, const char* name, const char* opt)
-{
-  aie_Archive* arc = aie_mkarchive(&KID_Engine_LiNK, NULL, NULL);
-  struct arc_header_t header;
-  struct arc_entry_t entry;
-  size_t arc_offset;
-
-  if(!test(file, name)) {
-    aie_kmarchive(arc);
-    return NULL;
+  if(strcmp(header.magic, "LNK")) {
+    header.magic[3] = 0;
+    AIE_ERROR(aie_EHEADER, header.magic);
+    return aie_ARCNIL;
   }
 
-  aie_arcfile_push(file, name, 0, &arc->files);
-  rewind(file);
+  aie_ArcFileCons* files = NULL;
+  aie_ArcUnitTable* table = aie_mkarctable(0);
+  size_t arc_offset = header.fcount * sizeof (entry_t) + sizeof header;
 
-  if(!fread(&header, sizeof header, 1, file) || feof(file) || ferror(file)) {
-    AIE_ERROR("Unable to read header from '%s'", name);
-    aie_kmarchive(arc);
-    return NULL;
-  }
+  aie_arcfile_push(file, &files);
 
-  arc_offset = header.fcount * sizeof entry + sizeof header;
+  for(int i = 0; i < header.fcount; i++) {
+    entry_t entry;
+    aie_ArcUnit unit;
+    aie_ArcSegment segment;
 
-  for(size_t i = 0; i < header.fcount; i++) {
-    aie_ArcUnitSegment* seg = NULL;
-
-    if(!fread(&entry, sizeof entry, 1, file) || feof(file) || ferror(file)) {
-      AIE_ERROR("Unable to read entry from '%s'", name);
-      aie_kmarchive(arc);
-      return NULL;
+    if(!fread(&entry, sizeof entry, 1, file.file)) {
+      AIE_ERROR(aie_EERRNO, file.name);
+      return aie_ARCNIL;
     }
 
-    aie_arcsegment_push(arc->files, entry.offset + arc_offset,
-        entry.fsize2 / 2, &seg);
-    aie_arctable_put(entry.fname, seg, entry.fsize2 / 2, 0, &arc->table);
+    unit = (aie_ArcUnit){ entry.name, NULL, entry.size2 / 2, 0 };
+    segment = (aie_ArcSegment)
+              { &files->car, entry.offset + arc_offset, entry.size2 / 2 };
+    aie_arcsegment_push(segment, &unit.segments);
+    aie_arctable_put(unit, &table);
   }
 
-  return arc;
+  return (aie_Archive){ &kid_engine_link, table, files };
 }
 
-aie_ArcFormat kid_engine_link = // format description
-{
-  .id               = aie_ARC_KID_ENGINE_LINK,
-  .name             = "KID-Engine-LiNK",
-  .subformat_num    = 0,
-  .subformat_names  = NULL,
-  .ext              = "dat",
-  .features         = aie_FMTOpen | aie_FMTUnsafe,
-  .filename_len     = 24,
-  .drv_version      = 20130224,
-
-  .open             = &open,
-  .create           = NULL,     // TODO
-  .extract          = NULL,     // TODO
-};
-
-*/
