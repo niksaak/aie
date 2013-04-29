@@ -154,7 +154,7 @@ aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
 
 int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list)
 {
-  AIE_ASSERT((list != NULL), 1);
+  AIE_ASSERT((list != NULL), -1);
 
   if(*list == NULL) {
     return 0;
@@ -201,7 +201,7 @@ aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
 
 int aie_arcfile_list_destroy(aie_ArcFileCons** list)
 {
-  AIE_ASSERT(list != NULL, 1);
+  AIE_ASSERT(list != NULL, -1);
 
   if(*list == NULL) {
     return 0;

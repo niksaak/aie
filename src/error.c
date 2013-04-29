@@ -44,6 +44,13 @@ void aie_esuccess(const char* func)
   err = (aie_Error){ aie_ESUCCESS, 0, func, NULL };
 }
 
+int aie_iserror(void)
+{
+  if(err.level >= aie_ELError)
+    return 1;
+  return 0;
+}
+
 aie_Error aie_geterror(void)
 {
   return err;

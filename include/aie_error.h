@@ -14,11 +14,9 @@
 #define AIE_PANIC(errno, datum) \
   aie_error(errno, aie_ELPanic, __func__, datum)
 
-#define AIE_WASSERT(assertion)                                      \
-  do {                                                              \
-    if(!(assertion))                                                \
-      aie_error(aie_EASSERT, aie_ELWarning, __func__, #assertion);  \
-  } while(0)
+#define AIE_WASSERT(assertion)                                    \
+  if(!(assertion))                                                \
+    aie_error(aie_EASSERT, aie_ELWarning, __func__, #assertion)
 
 #define AIE_ASSERT(assertion, ret)                                \
   do {                                                            \
@@ -36,8 +34,8 @@
     }                                                             \
   } while(0)
 
-#define AIE_ERETURN(val)                  \
-  if(aie_geterror().level >= aie_ELError) \
+#define AIE_ERETURN(val) \
+  if(aie_iserror())      \
     return val
 
 #define AIE_ERESET() \
@@ -87,6 +85,9 @@ void aie_error(aie_Errno e, aie_ErrorLevel level,
 
 void aie_esuccess(const char* func);
     // reset error
+
+int aie_iserror(void);
+    // returns nonzero if error occured
 
 aie_Error aie_geterror(void);
     // get last error

@@ -1,8 +1,6 @@
 #include <aie_fibonacci.h>
 
-#define AIE_FIBONACCI_ARR_LEN 42
-
-long aie_fibnums[AIE_FIBONACCI_ARR_LEN] =
+long fibnums[] =
 { // lookup table for aie_fib() function
   0,
   1,
@@ -46,15 +44,17 @@ long aie_fibnums[AIE_FIBONACCI_ARR_LEN] =
   63245986,
   102334155,
   165580141
-    // well, i think even if ai or some plugin-writer would want to allocate
+    // well, i think even if me or some plugin-writer would want to allocate
     // more than 158 NYACKIN MEGABYTES in one chunk, it will be fast enough
 };
 
+static const unsigned aie_FIB_ARRAY_LEN = sizeof fibnums * sizeof (long);
+
 long aie_fib(int n)
-{ // TODO: possibly make this inlined
+{
   if(n > 0) {
-    if(n < 39) {
-      return aie_fibnums[n];
+    if(n < aie_FIB_ARRAY_LEN) {
+      return fibnums[n];
     } else
       return aie_fib(n - 1) + aie_fib(n - 2);
   }
