@@ -104,10 +104,10 @@ typedef struct aie_ArcFormat
   enum aie_ArcFormatFeatures features;
 
   unsigned subformat_num;       // number of subformats
-  char* subformat_names;        // subformat names, colon separated
+  char* subformat_names;        // subformat names, semicolon separated
   char* ext;                    // file extensions for archive, space separated
   size_t filename_len;          // max filename len
-  uint32_t drv_version;         // version in format 0xYYYYmmdd
+  const char* version;          // formatter version
 
   aie_ArcOpenF open;
   // aie_ArcCreateF create;
@@ -160,9 +160,9 @@ inline size_t aie_arcfmt_namelen(const aie_ArcFormat* format)
   return format->filename_len;
 }
 
-inline uint32_t aie_arcfmt_ver(const aie_ArcFormat* format)
+inline const char* aie_arcfmt_ver(const aie_ArcFormat* format)
 {   // get formatter version
-  return format->drv_version;
+  return format->version;
 }
 
 // Archive:

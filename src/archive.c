@@ -44,7 +44,7 @@ aie_arcfmt_features(const aie_ArcFormat* format);
 
 extern inline size_t aie_arcfmt_namelen(const aie_ArcFormat* format);
 
-extern inline uint32_t aie_arcfmt_ver(const aie_ArcFormat* format);
+extern inline const char* aie_arcfmt_ver(const aie_ArcFormat* format);
 
 // Archive:
 // aie_ArcFormat* fmt
