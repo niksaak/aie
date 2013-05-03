@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include <aie_archive-kinds.h>
+
 #include <aie_error.h>
 #include <aie_util.h>
 
@@ -24,7 +25,7 @@ typedef enum aie_ArcFormatFeatures
 } aie_ArcFormatFeatures;
 
 typedef struct aie_ArcSegment
-{ // Represents segment of archived file, can form linked list
+{ // Represents segment of archived unit
   struct aie_ArcFile* file;     // file where segment starts
   size_t offset;                // offset of segment, filewise
   size_t size;                  // segment size
@@ -37,7 +38,7 @@ typedef struct aie_ArcSegmentCons
 } aie_ArcSegmentCons;
 
 typedef struct aie_ArcUnit
-{ // Archive allocaton unit, represents one file in archive
+{ // Archive allocaton unit, represents file in archive
   char* name;                   // unit name, freeable
   struct aie_ArcSegmentCons* segments; // unit segmentation
   size_t size;                  // uncompressed size
@@ -52,7 +53,7 @@ typedef struct aie_ArcUnitTable
 } aie_ArcUnitTable;
 
 typedef struct aie_ArcFile
-{ // Represents archive volume
+{ // Represents file in filesystem
   FILE* file;                   // file descriptor
   char* name;                   // full filename, freeable
   int role;                     // file role
@@ -244,6 +245,9 @@ int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list);
 
 size_t aie_arcsegment_sumsize(aie_ArcSegmentCons* list);
     // total size of segments in list
+
+size_t aie_arcsegment_count(aie_ArcSegmentCons* list);
+    // count segments in list
 
 
 // ArcFile:
