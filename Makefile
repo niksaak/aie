@@ -39,10 +39,10 @@ core: $(MAIN_OBJECTS)
 
 formats: $(FORMATS_OBJECTS)
 
-test: static_lib dynamic_lib
+# test: static_lib dynamic_lib
 #	$(MAKE) -C test/ all
 
-runtest: all
+# runtest: all
 #	$(MAKE) -C test/ run
 
 lint:
@@ -51,6 +51,8 @@ lint:
 lint-headers:
 #	$(CC) $(CFLAGS) -v -fsyntax-only $(wildcard include/*)
 	$(CC) -x c-header -o /dev/null $(CFLAGS) $(wildcard include/*)
+
+include test/makefile.inc
 
 $(STATIC_LIB): $(OBJECTS)
 	$(AR) -rcuv $@ $?
