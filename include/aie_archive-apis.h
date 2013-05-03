@@ -4,8 +4,8 @@
 
 aie_Archive aie_arcopen(aie_ArcFile file, aie_ArcFormatKind kind,
                         const char* opt);
-    // try to open archive assuming it is of kind or, if kind < 0, deducing
-    // its kind with aie_arcdeduce()
+    // try to open archive assuming it is of kind or, if kind < 0,
+    // deducing its kind first
 
 /*
 aie_Archive aie_arccreate(aie_ArcFile file, char** pathnames,

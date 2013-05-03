@@ -246,8 +246,11 @@ int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list);
 size_t aie_arcsegment_sumsize(aie_ArcSegmentCons* list);
     // total size of segments in list
 
-size_t aie_arcsegment_count(aie_ArcSegmentCons* list);
-    // count segments in list
+inline size_t aie_arcsegment_count(aie_ArcSegmentCons* list)
+{  // count segments in list
+  if(list == NULL) return 0;
+  return 1 + aie_arcsegment_count(list->cdr);
+}
 
 
 // ArcFile:

@@ -175,6 +175,8 @@ size_t aie_arcsegment_sumsize(aie_ArcSegmentCons* list)
   return list->car.size + aie_arcsegment_sumsize(list->cdr);
 }
 
+extern inline size_t aie_arcsegment_count(aie_ArcSegmentCons* list);
+
 
 // ArcFile
 // FILE* file
