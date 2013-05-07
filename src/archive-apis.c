@@ -1,4 +1,5 @@
 #include <aie_archive-apis.h>
+#include <aie_archive-formats.h>
 #include <aie_error.h>
 
 #define ASSERT_ENOWAY(fun, datum, ret) \
@@ -9,12 +10,12 @@
     } \
   } while(0)
 
-static aie_Archive open_recognizing(aie_ArcFile file)
+static aie_Archive open_recognizing(aie_ArcFile file, const char* opt)
 { // TODO: check formatters with matching fileextensions first
   AIE_ERESET();
 
-  for(int i = 0; i < aie_ARC_KIND_COUNT; i++) {
-    aie_Archive arc = aie_arcopen(file, i, NULL);
+  for(int i = 0; i < aie_ARCFORMATS_COUNT; i++) {
+    aie_Archive arc = (*aie_arcformats[i]->open)(file, NULL);
 
     if(arc.fmt != NULL)
       return arc;
@@ -27,22 +28,33 @@ static aie_Archive open_recognizing(aie_ArcFile file)
   return aie_ARCNIL;
 }
 
-aie_Archive aie_arcopen(aie_ArcFile file, aie_ArcFormatKind kind,
+aie_Archive aie_arcopen(char* file, aie_ArcFormatKind kind,
     const char* opt)
 {
   AIE_ERESET();
 
   aie_ArcFormat fmt;
+  aie_ArcFile arcfile = {0};
+
+  if(file != NULL) {
+    arcfile = (aie_ArcFile){ fopen(file, "r"), file };
+    if(arcfile.file == NULL) {
+      AIE_ERROR(aie_EERRNO, file);
+      return aie_ARCNIL;
+    }
+  } else {
+    arcfile = (aie_ArcFile){ stdin, "stdin" };
+  }
 
   if(kind == aie_ARC_KIND_UNKNOWN) {
-    return open_recognizing(file);
+    return open_recognizing(arcfile, opt);
   }
   fmt = aie_arcfmt(kind);
   if(fmt.id == aie_ARC_KIND_UNKNOWN)
     return aie_ARCNIL;
   ASSERT_ENOWAY(fmt.open, fmt.name, aie_ARCNIL);
 
-  return (*fmt.open)(file, opt);
+  return (*fmt.open)(arcfile, opt);
 }
 
 /*

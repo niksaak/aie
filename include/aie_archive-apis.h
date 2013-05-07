@@ -2,7 +2,7 @@
 
 #include <aie_archive.h>
 
-aie_Archive aie_arcopen(aie_ArcFile file, aie_ArcFormatKind kind,
+aie_Archive aie_arcopen(char* file, aie_ArcFormatKind kind,
                         const char* opt);
     // try to open archive assuming it is of kind or, if kind < 0,
     // deducing its kind first

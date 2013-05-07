@@ -85,8 +85,10 @@ int aie_kmarctable(aie_ArcUnitTable* table)
 {
   if(table == NULL)
     AIE_WARNING(aie_ENURUPO, "table");
-  for(int i = 0; i < table->unitc; i++)
+  for(int i = 0; i < table->unitc; i++) {
     free(table->unitv[i].name);
+    aie_arcsegment_list_destroy(&table->unitv[i].segments);
+  }
   free(table);
 
   return 0;
