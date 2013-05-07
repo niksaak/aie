@@ -21,14 +21,16 @@ SOURCES := $(MAIN_SOURCES) $(FORMATS_SOURCES)
 OBJECTS = $(MAIN_OBJECTS) $(FORMATS_OBJECTS)
 
 .PHONY: all debug release static_lib dynamic_lib core formats test runtest lint
-.PHONY: clean cleantest cleandist
+.PHONY: clean cleantest cleanmost
 
 all: static_lib dynamic_lib test
 
-debug: clean cleandist
+include test/makefile.inc
+
+debug: clean
 	$(MAKE) BUILD=debug all
 
-release: clean cleandist
+release: clean
 	$(MAKE) BUILD=release all
 
 static_lib: $(STATIC_LIB)
@@ -51,8 +53,6 @@ lint:
 lint-headers:
 #	$(CC) $(CFLAGS) -v -fsyntax-only $(wildcard include/*)
 	$(CC) -x c-header -o /dev/null $(CFLAGS) $(wildcard include/*)
-
-include test/makefile.inc
 
 $(STATIC_LIB): $(OBJECTS)
 	$(AR) -rcuv $@ $?
