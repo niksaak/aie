@@ -32,7 +32,7 @@ inline void test(char* (*fun)(void), const char* name)
     printf("OK\n");
     success_count++;
   } else {
-    printf("FAILURE (%s)\n", result);
+    printf("FAIL (%s)\n", result);
     failure_count++;
   }
 }

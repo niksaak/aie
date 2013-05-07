@@ -43,6 +43,9 @@ static aie_Archive open(aie_ArcFile file, const char* opt)
   AIE_ASSERT(file.file != NULL, aie_ARCNIL);
 
   header_t header = {{0}};
+  aie_ArcFileCons* files = NULL;
+  aie_ArcUnitTable* table = NULL;
+  size_t arc_offset;
 
   if(!fread(&header, sizeof header, 1, file.file)) {
     AIE_ERROR(aie_EERRNO, file.name);
@@ -54,9 +57,8 @@ static aie_Archive open(aie_ArcFile file, const char* opt)
     return aie_ARCNIL;
   }
 
-  aie_ArcFileCons* files = NULL;
-  aie_ArcUnitTable* table = aie_mkarctable(0);
-  size_t arc_offset = header.fcount * sizeof (entry_t) + sizeof header;
+  table = aie_mkarctable(0);
+  arc_offset = header.fcount * sizeof (entry_t) + sizeof header;
 
   aie_arcfile_push(file, &files);
 
