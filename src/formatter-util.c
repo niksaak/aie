@@ -7,9 +7,9 @@
 
 size_t aie_xor_array(const char* array, const char* xor, char* buf,
     size_t array_size, size_t xor_size, size_t buf_size)
-{ // TODO: counters need better names
-  size_t i = 0; // array counter
-  size_t j = 0; // xor counter
+{
+  size_t i = 0; // array iterator
+  size_t x = 0; // bottles of beer on the wall
 
   if(array_size == 0 || buf_size == 0) { // corner case
     return 0;
@@ -27,17 +27,17 @@ size_t aie_xor_array(const char* array, const char* xor, char* buf,
     AIE_ERROR(aie_ENURUPO, "xor");
     return 0;
   }
-  if(xor_size == 1) {
+  if(xor_size == 1) { // for one char call xor1
     return aie_xor1_array(array, *xor, buf, array_size, buf_size);
   }
 
   do {
-    if(j == xor_size) { // go to the store and sell some more
-      j = 0; // no more bottles of beer on the wall
+    if(j == xor_size) { // too many bottles of beer on the wall
+      x = 0; // go to the mall and sell them all
     }
-    buf[i] = array[i] ^ xor[j];
+    buf[i] = array[i] ^ xor[x]; // give 'em beer, make 'em cheer
     i = i + 1;
-    j = j + 1;
+    x = j + 1; // go to the store and get one more
   } while(i < array_size && i < buf_size);
 
   return i;
@@ -48,10 +48,10 @@ size_t aie_xor1_array(const char* array, char xor, char* buf,
 {
   size_t i = 0;
 
-  if(array_size == 0 || buf_size == 0) {
+  if(array_size == 0 || buf_size == 0) { // corner case
     return 0;
   }
-  if(array == NULL || buf == NULL) {
+  if(array == NULL || buf == NULL) { // nurupo~
     AIE_ERROR(aie_ENURUPO, "array or buf");
     return 0;
   }
