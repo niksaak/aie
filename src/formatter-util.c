@@ -32,12 +32,12 @@ size_t aie_xor_array(const char* array, const char* xor, char* buf,
   }
 
   do {
-    if(j == xor_size) { // too many bottles of beer on the wall
+    if(x == xor_size) { // too many bottles of beer on the wall
       x = 0; // go to the mall and sell them all
     }
     buf[i] = array[i] ^ xor[x]; // give 'em beer, make 'em cheer
     i = i + 1;
-    x = j + 1; // go to the store and get one more
+    x = x + 1; // go to the store and get one more
   } while(i < array_size && i < buf_size);
 
   return i;

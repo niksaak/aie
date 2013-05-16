@@ -9,7 +9,7 @@ aie_Error err;
 static void tacit_hook_f(aie_Error e)
 { return; }
 
-static void default_hook_f(aie_Error e)
+static void debug_hook_f(aie_Error e)
 {
   char* errname = aie_errstr(e.e);
   char* errlvl = "???";
@@ -29,14 +29,19 @@ static void default_hook_f(aie_Error e)
 }
 
 const aie_ErrorHookF aie_tacit_error_hook = &tacit_hook_f;
-const aie_ErrorHookF aie_default_error_hook = &default_hook_f;
+const aie_ErrorHookF aie_debug_error_hook = &debug_hook_f;
 
-aie_ErrorHookF hook = &default_hook_f;
+#ifdef DEBUG_MODE
+aie_ErrorHookF hook = &debug_hook_f;
+#else
+aie_ErrorHookF hook = &tacit_hook_f;
+#endif
 
 void aie_error(aie_Errno e, aie_ErrorLevel level,
                const char* function, char* datum)
 {
   err = (aie_Error){ e, level, function, datum };
+  (*hook)(err);
 }
 
 void aie_esuccess(const char* func)
@@ -61,7 +66,7 @@ aie_ErrorHookF aie_set_error_hook(aie_ErrorHookF fun)
   aie_ErrorHookF oldhook = hook;
 
   if(fun == NULL) {
-    hook = aie_default_error_hook;
+    hook = aie_debug_error_hook;
   } else {
     hook = fun;
   }

@@ -99,4 +99,5 @@ char* aie_errstr(aie_Errno e);
     // get string representation for err
 
 extern const aie_ErrorHookF aie_tacit_error_hook;
-extern const aie_ErrorHookF aie_default_error_hook;
+extern const aie_ErrorHookF aie_debug_error_hook;
+
