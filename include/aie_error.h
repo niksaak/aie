@@ -14,6 +14,7 @@
 #define AIE_PANIC(errno, datum) \
   aie_error(errno, aie_ELPanic, __func__, datum)
 
+
 #define AIE_WASSERT(assertion)                                    \
   if(!(assertion))                                                \
     aie_error(aie_EASSERT, aie_ELWarning, __func__, #assertion)
@@ -34,6 +35,7 @@
     }                                                             \
   } while(0)
 
+
 #define AIE_ERETURN(val) \
   if(aie_iserror())      \
     return val
@@ -41,11 +43,13 @@
 #define AIE_ERESET() \
   aie_esuccess(__func__)
 
+
 #define AIE_WITH_ERROR_HOOK(var) \
   var = aie_set_error_hook(var)
 
 #define AIE_WITH_ERROR_HOOK_END(var) \
   aie_set_error_hook(var)
+
 
 typedef enum aie_Errno {
   aie_ESUCCESS, // No error

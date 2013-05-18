@@ -38,7 +38,7 @@ aie_Archive aie_arcopen(char* file, aie_ArcFormatKind kind,
 
   if(file != NULL) {
     arcfile = (aie_ArcFile){ fopen(file, "r"), file };
-    if(arcfile.file == NULL) {
+    if(arcfile.stream == NULL) {
       AIE_ERROR(aie_EERRNO, file);
       return aie_ARCNIL;
     }

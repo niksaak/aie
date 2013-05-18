@@ -40,14 +40,14 @@ typedef struct entry_r {
 
 static aie_Archive open(aie_ArcFile file, const char* opt)
 { // TODO: check archive integrity
-  AIE_ASSERT(file.file != NULL, aie_ARCNIL);
+  AIE_ASSERT(file.stream != NULL, aie_ARCNIL);
 
   header_t header = {{0}};
   aie_ArcFileCons* files = NULL;
   aie_ArcUnitTable* table = NULL;
   size_t arc_offset;
 
-  if(!fread(&header, sizeof header, 1, file.file)) {
+  if(!fread(&header, sizeof header, 1, file.stream)) {
     AIE_ERROR(aie_EERRNO, file.name);
     return aie_ARCNIL;
   }
@@ -67,7 +67,7 @@ static aie_Archive open(aie_ArcFile file, const char* opt)
     aie_ArcUnit unit;
     aie_ArcSegment segment;
 
-    if(!fread(&entry, sizeof entry, 1, file.file)) {
+    if(!fread(&entry, sizeof entry, 1, file.stream)) {
       AIE_ERROR(aie_EERRNO, file.name);
       return aie_ARCNIL;
     }

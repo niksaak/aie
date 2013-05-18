@@ -15,7 +15,7 @@
 
 aie_ArcFormat aie_arcfmt(aie_ArcFormatKind kind)
 {
-  if(kind >= aie_ARCFORMATS_COUNT) {
+  if(kind >= aie_ARC_KIND_COUNT) {
     AIE_ERROR(aie_EINDEX, aie_mkstring("%i", kind));
     return aie_ARCFMTNIL;
   }
@@ -56,8 +56,16 @@ extern inline aie_Archive aie_mkarchive(aie_ArcFormat* format,
 
 int aie_kmarchive(aie_Archive* archive)
 {
-  if(archive->table != NULL) aie_kmarctable(archive->table);
-  if(archive->files != NULL) aie_arcfile_list_destroy(&archive->files);
+  if(archive == NULL) {
+    AIE_ERROR(aie_ENURUPO, "archive");
+    return 1;
+  }
+  if(archive->table != NULL) {
+    aie_kmarctable(archive->table);
+  }
+  if(archive->files != NULL) {
+    aie_arcfile_list_destroy(&archive->files);
+  }
   *archive = aie_ARCNIL;
 
   return 0;
@@ -83,8 +91,10 @@ aie_ArcUnitTable* aie_mkarctable(size_t size)
 
 int aie_kmarctable(aie_ArcUnitTable* table)
 {
-  if(table == NULL)
-    AIE_WARNING(aie_ENURUPO, "table");
+  if(table == NULL) {
+    AIE_ERROR(aie_ENURUPO, "table");
+    return 1;
+  }
   for(int i = 0; i < table->unitc; i++) {
     free(table->unitv[i].name);
     aie_arcsegment_list_destroy(&table->unitv[i].segments);
@@ -99,16 +109,18 @@ extern inline aie_ArcUnit aie_arctable_get(aie_ArcUnitTable* table,
 
 size_t aie_arctable_put(aie_ArcUnit unit, aie_ArcUnitTable** table)
 {
-  if(*table == NULL)
+  if(*table == NULL) {
+    AIE_WARNING(aie_ENURUPO, "table");
     *table = aie_mkarctable(0);
-  unit.name = strdup(unit.name);
+  }
 
   size_t index = (*table)->unitc++;
   size_t allocc = (*table)->unitc * sizeof unit + sizeof **table;
 
+  unit.name = strdup(unit.name);
+
   if(allocc > (*table)->allocc) {
     long fib = aie_nextfib((*table)->allocc);
-
     *table = aie_realloc(*table, sizeof **table + fib - fib % sizeof unit);
   }
 
@@ -143,7 +155,10 @@ extern inline int aie_kmarcsegment(aie_ArcSegment* segment);
 aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
     aie_ArcSegmentCons** list)
 {
-  AIE_ASSERT(list != NULL, NULL);
+  if(list == NULL) {
+    AIE_ERROR(aie_ENURUPO, "list");
+    return NULL;
+  }
 
   if(*list == NULL) {
     *list = aie_malloc(sizeof (aie_ArcSegmentCons));
@@ -156,7 +171,10 @@ aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
 
 int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list)
 {
-  AIE_ASSERT((list != NULL), -1);
+  if(list == NULL) {
+    AIE_ERROR(aie_ENURUPO, "list");
+    return 1;
+  }
 
   if(*list == NULL) {
     return 0;
@@ -191,7 +209,10 @@ extern inline int aie_kmarcfile(aie_ArcFile* file);
 
 aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
 {
-  AIE_ASSERT(list != NULL, NULL);
+  if(list == NULL) {
+    AIE_ERROR(aie_ENURUPO, "list");
+    return NULL;
+  }
 
   file.name = strdup(file.name);
   if(*list == NULL) {
@@ -205,7 +226,10 @@ aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
 
 int aie_arcfile_list_destroy(aie_ArcFileCons** list)
 {
-  AIE_ASSERT(list != NULL, -1);
+  if(list == NULL) {
+    AIE_ERROR(aie_ENURUPO, "list");
+    return 1;
+  }
 
   if(*list == NULL) {
     return 0;

@@ -54,7 +54,7 @@ typedef struct aie_ArcUnitTable
 
 typedef struct aie_ArcFile
 { // Represents file in filesystem
-  FILE* file;                   // file descriptor
+  FILE* stream;                   // file stream
   char* name;                   // full filename, freeable
   int role;                     // file role
 } aie_ArcFile;
@@ -135,12 +135,20 @@ aie_ArcFormat aie_arcfmt(aie_ArcFormatKind kind);
 
 inline char* aie_arcfmt_name(const aie_ArcFormat* format)
 {   // get format name
+  if(format == NULL) {
+    AIE_ERROR(aie_ENURUPO, "format");
+    return NULL;
+  }
   return format->name;
 }
 
 inline char* aie_arcfmt_subformats(const aie_ArcFormat* format)
 {   // get string listing subformats of format, colon separated, or NULL
     // if there is no subformats.
+  if(format == NULL) {
+    AIE_ERROR(aie_ENURUPO, "format");
+    return NULL;
+  }
   return format->subformat_names;
 }
 
@@ -148,21 +156,37 @@ inline char* aie_arcfmt_extensions(const aie_ArcFormat* format)
 {   // get string listing acceptable fileextensions for 'format'
     // space separated, or NULL if archives of this format
     // can not be recognized by fileextension.
+  if(format == NULL) {
+    AIE_ERROR(aie_ENURUPO, "format");
+    return NULL;
+  }
   return format->ext;
 }
 
 inline aie_ArcFormatFeatures aie_arcfmt_features(const aie_ArcFormat* format)
 {   // get formatter features
+  if(format == NULL) {
+    AIE_ERROR(aie_ENURUPO, "format");
+    return 0;
+  }
   return format->features;
 }
 
 inline size_t aie_arcfmt_namelen(const aie_ArcFormat* format)
 {   // get maximum filename length in bytes for format
+  if(format == NULL) {
+    AIE_ERROR(aie_ENURUPO, "format");
+    return 0;
+  }
   return format->filename_len;
 }
 
 inline const char* aie_arcfmt_ver(const aie_ArcFormat* format)
 {   // get formatter version
+  if(format == NULL) {
+    AIE_ERROR(aie_ENURUPO, "format");
+    return NULL;
+  }
   return format->version;
 }
 
@@ -192,6 +216,10 @@ int aie_kmarctable(aie_ArcUnitTable* table);
 
 inline aie_ArcUnit aie_arctable_get(aie_ArcUnitTable* table, size_t index)
 {
+  if(table == NULL) {
+    AIE_ERROR(aie_ENURUPO, "table");
+    return (aie_ArcUnit){0};
+  }
   if(index >= table->unitc) {
     AIE_ERROR(aie_EINDEX, aie_mkstring("%z", index));
     return (aie_ArcUnit){0};
@@ -216,6 +244,10 @@ inline aie_ArcUnit aie_mkarcunit(char* name,
 
 inline int aie_kmarcunit(aie_ArcUnit* unit)
 { // deinit arcunit
+  if(unit == NULL) {
+    AIE_ERROR(aie_ENURUPO, "unit");
+    return 1;
+  }
   *unit = (aie_ArcUnit){ NULL, NULL, 0, 0 };
   return 0;
 }
@@ -232,6 +264,10 @@ inline aie_ArcSegment aie_mkarcsegment(aie_ArcFile* file,
 
 inline int aie_kmarcsegment(aie_ArcSegment* segment)
 {   // set segment fields to default values
+  if(segment == NULL) {
+    AIE_ERROR(aie_ENURUPO, "segment");
+    return 1;
+  }
   *segment = (aie_ArcSegment){ 0, 0, 0 };
   return 0;
 }
@@ -248,7 +284,9 @@ size_t aie_arcsegment_sumsize(aie_ArcSegmentCons* list);
 
 inline size_t aie_arcsegment_count(aie_ArcSegmentCons* list)
 {  // count segments in list
-  if(list == NULL) return 0;
+  if(list == NULL) {
+    return 0;
+  }
   return 1 + aie_arcsegment_count(list->cdr);
 }
 
