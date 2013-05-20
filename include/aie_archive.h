@@ -6,8 +6,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <aie_archive-kinds.h>
-
+#include <aie_archive-formats.h>
 #include <aie_error.h>
 #include <aie_util.h>
 

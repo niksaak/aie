@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include <aie_archive.h>
-#include <aie_archive-kinds.h>
+#include <aie_archive-formats.h>
 
 static aie_Archive open(aie_ArcFile file, const char* opt);
 
