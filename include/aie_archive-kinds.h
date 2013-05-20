@@ -1,3 +1,5 @@
+/* aie_archive-kinds.h - archive kinds enumeration */
+
 #pragma once
 
 typedef enum aie_ArcFormatKind

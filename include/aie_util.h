@@ -1,3 +1,5 @@
+/* aie_util.h - general utilities */
+
 #pragma once
 
 #include <stdlib.h>
@@ -25,11 +27,15 @@ inline long aie_roundtol(long num, long divisor)
   return num - num % divisor;
 }
 
+int aie_ensure_dir(const char* pathname);
+    // ensure pathname exists
+
 #if !(_SVID_SOURCE || _BSD_SOURCE || _XOPEN_SOURCE >= 500 || \
       _XOPEN_SOURCE && _XOPEN_SOURCE_EXTENDED || _POSIX_C_SOURCE >= 200809L)
-#define AIE_OWN_STRDUP 1
 
+#define AIE_OWN_STRDUP 1
 char* strdup(const char* s);
+    // define our own strdup() if we don't have one
 
 #endif
 

@@ -1,3 +1,5 @@
+/* aie_archive-apis.h - apis for arc-hives */
+
 #pragma once
 
 #include <aie_archive.h>
@@ -17,7 +19,7 @@ int aie_arcextract(const aie_Archive* archive, const char* target,
                    const char* opt);
     // extract archive to the target directory
 
-int aie_arc_uextract(const aie_ArcUnit* unit, const aie_ArcFormat* fmt,
+int aie_arc_uextract(aie_ArcUnit unit, const aie_ArcFormat* fmt,
                      const char* target, const char* opt);
     // extract unit of format fmt to target.
     // Target can be filename, in which case unit will be extracted to file of
@@ -25,7 +27,7 @@ int aie_arc_uextract(const aie_ArcUnit* unit, const aie_ArcFormat* fmt,
     // that directory named unit->name, or NULL, in which case unit will be
     // extracted to stdout
 
-size_t aie_arc_umextract(const aie_ArcUnit* unit, const aie_ArcFormat* fmt,
+size_t aie_arc_umextract(aie_ArcUnit unit, const aie_ArcFormat* fmt,
                          char* buf, size_t offset, size_t size,
                          const char* opt);
     // extract unit of format fmt to memory buffer buf starting at offset,

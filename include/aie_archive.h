@@ -1,3 +1,5 @@
+/* aie_archive.h - general archive tools */
+
 #pragma once
 
 #include <inttypes.h>
@@ -81,15 +83,14 @@ typedef int
     // pointer to function that extracts archive
 
 typedef int
-(*aie_ArcUnitExtractF)(const struct aie_ArcUnit* unit, const char* target,
-                       const char* opt);
+(*aie_ArcUnitExtractF)(aie_ArcUnit unit, const char* target, const char* opt);
     // pointer to function that extracts unit.
     // target can be filename, in which case unit must be extracted to
     // file with that name, or directory, in which case unit must be extracted
     // to file in that directory named unit->name
 
 typedef size_t
-(*aie_ArcUnitMemExtractF)(const struct aie_ArcUnit* unit,
+(*aie_ArcUnitMemExtractF)(aie_ArcUnit unit,
                           char* buf, size_t offset, size_t size,
                           const char* opt);
     // pointer to function that extracts unit to memory buffer.

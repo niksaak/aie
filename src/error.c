@@ -11,7 +11,7 @@ static void tacit_hook_f(aie_Error e)
 
 static void debug_hook_f(aie_Error e)
 {
-  char* errname = aie_errstr(e.e);
+  char* errname = aie_errstr(e.no);
   char* errlvl = "???";
 
   switch(e.level) {
@@ -25,6 +25,7 @@ static void debug_hook_f(aie_Error e)
   fprintf(stderr, "%s", errlvl);
   if(e.function != NULL) fprintf(stderr, " @ %s", e.function);
   fprintf(stderr, ": %s", errname);
+  if(e.no == aie_EERRNO) fprintf(stderr, " (%s)", strerror(errno));
   if(e.datum != NULL) fprintf(stderr, ", datum: %s", e.datum);
 }
 
@@ -38,9 +39,12 @@ aie_ErrorHookF hook = &tacit_hook_f;
 #endif
 
 void aie_error(aie_Errno e, aie_ErrorLevel level,
-               const char* function, char* datum)
+               const char* function, const char* datum)
 {
-  err = (aie_Error){ e, level, function, datum };
+  static char errdatum[4096];
+
+  strncpy(errdatum, datum, 4096);
+  err = (aie_Error){ e, level, function, errdatum };
   (*hook)(err);
 }
 

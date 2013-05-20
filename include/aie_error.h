@@ -1,3 +1,5 @@
+/* aie_error.h - error handling */
+
 #pragma once
 
 #include <stdarg.h>
@@ -75,7 +77,7 @@ typedef enum aie_ErrorLevel {
 } aie_ErrorLevel;
 
 typedef struct aie_Error {
-  aie_Errno e;
+  aie_Errno no;
   aie_ErrorLevel level;
   const char* function;
   char* datum;
@@ -84,7 +86,7 @@ typedef struct aie_Error {
 typedef void (*aie_ErrorHookF)(aie_Error error);
 
 void aie_error(aie_Errno e, aie_ErrorLevel level,
-               const char* function, char* datum);
+               const char* function, const char* datum);
     // set error possibly supplying additional information
 
 void aie_esuccess(const char* func);

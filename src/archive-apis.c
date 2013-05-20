@@ -85,7 +85,7 @@ int aie_arcextract(const aie_Archive* archive, const char* target,
   return (*archive->fmt->extract)(archive, target, opt);
 }
 
-int aie_arc_uextract(const aie_ArcUnit* unit, const aie_ArcFormat* fmt,
+int aie_arc_uextract(aie_ArcUnit unit, const aie_ArcFormat* fmt,
     const char* target, const char* opt)
 {
   AIE_ERESET();
@@ -99,7 +99,7 @@ int aie_arc_uextract(const aie_ArcUnit* unit, const aie_ArcFormat* fmt,
   return (*fmt->uextract)(unit, target, opt);
 }
 
-size_t aie_arc_umextract(const aie_ArcUnit* unit, const aie_ArcFormat* fmt,
+size_t aie_arc_umextract(aie_ArcUnit unit, const aie_ArcFormat* fmt,
     char* buf, size_t offset, size_t size, const char* opt)
 {
   AIE_ERESET();
