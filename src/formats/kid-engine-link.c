@@ -72,7 +72,8 @@ static aie_Archive open(aie_ArcFile file, const char* opt)
       return aie_ARCNIL;
     }
 
-    unit = (aie_ArcUnit){ entry.name, NULL, entry.size2 / 2, 0 };
+    unit = (aie_ArcUnit){ entry.name, NULL,
+                          entry.size2 / 2, entry.size2 / 2, 0 };
     segment = (aie_ArcSegment)
               { &files->car, entry.offset + arc_offset, entry.size2 / 2 };
     aie_arcsegment_push(segment, &unit.segments);

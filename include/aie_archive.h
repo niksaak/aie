@@ -42,6 +42,7 @@ typedef struct aie_ArcUnit
 { // Archive allocaton unit, represents file in archive
   char* name;                   // unit name, freeable
   struct aie_ArcSegmentCons* segments; // unit segmentation
+  size_t csize;                 // compressed size
   size_t size;                  // uncompressed size
   aie_ArcUnitFlags flags;       // unit flags, ORed
 } aie_ArcUnit;
@@ -55,7 +56,7 @@ typedef struct aie_ArcUnitTable
 
 typedef struct aie_ArcFile
 { // Represents file in filesystem
-  FILE* stream;                   // file stream
+  FILE* stream;                 // file stream
   char* name;                   // full filename, freeable
   int role;                     // file role
 } aie_ArcFile;
