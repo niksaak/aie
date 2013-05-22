@@ -9,11 +9,10 @@ int aie_xor_extract(const aie_Archive* archive, const char* target,
     // function for extracting non-compressed, possibly xored archives;
     // if xor == NULL, extracts data unchanged
 
-int aie_xor_uextract(aie_ArcUnit unit, const char* target,
-                     const char* xor);
+int aie_xor_uextract(aie_ArcUnit unit, const char* target, const char* xor);
     // same as above, for ArcUnits
 
-int aie_xor_umextract(aie_ArcUnit unit, char* buf,
+size_t aie_xor_umextract(aie_ArcUnit unit, char* buf,
                       size_t offset, size_t size, const char* xor);
     // same as above, streaming
 

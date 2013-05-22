@@ -32,6 +32,7 @@ size_t aie_arc_umextract(aie_ArcUnit unit, const aie_ArcFormat* fmt,
                          const char* opt);
     // extract unit of format fmt to memory buffer buf starting at offset,
     // writing no more than size bytes.
-    // Returns number of bytes written if end of file encountered,
-    // otherwise returns offset + size + 1, i.e. index of next unwritten byte.
+    // Returns number of bytes written if unit segments size is less than
+    // size, otherwise returns offset + size + 1, i.e. index of next
+    // unwritten byte.
 
