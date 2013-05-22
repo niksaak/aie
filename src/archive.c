@@ -152,6 +152,7 @@ extern inline aie_ArcSegment aie_mkarcsegment(aie_ArcFile* file, size_t offset,
 
 extern inline int aie_kmarcsegment(aie_ArcSegment* segment);
 
+/*
 aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
     aie_ArcSegmentCons** list)
 {
@@ -167,6 +168,22 @@ aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
   }
 
   return aie_arcsegment_push(segment, &(*list)->cdr);
+}
+*/
+
+aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
+    aie_ArcSegmetnCons** list)
+{
+  if(list == NULL) {
+    AIE_ERROR(aie_ENURUPO, "list");
+    return NULL;
+  }
+
+  for(; list->cdr != NULL; list = &(*list)->cdr);
+  *list = aie_malloc(sizeof (aie_ArcSegmentCons));
+  **list = (aie_ArcSegmentCons){ segment, NULL };
+
+  return *list;
 }
 
 int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list)
@@ -207,6 +224,25 @@ extern inline aie_ArcFile aie_mkarcfile(FILE* file, char* name, int role);
 
 extern inline int aie_kmarcfile(aie_ArcFile* file);
 
+/*
+aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
+{
+  if(list == NULL) {
+    AIE_ERROR(aie_ENURUPO, "list");
+    return NULL;
+  }
+
+  file.name = strdup(file.name); // XXX: gah, leakage!
+  if(*list == NULL) {
+    *list = aie_malloc(sizeof (aie_ArcFileCons));
+    **list = (aie_ArcFileCons){ file, NULL };
+    return *list;
+  }
+
+  return aie_arcfile_push(file, &(*list)->cdr);
+}
+*/
+
 aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
 {
   if(list == NULL) {
@@ -215,13 +251,11 @@ aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
   }
 
   file.name = strdup(file.name);
-  if(*list == NULL) {
-    *list = aie_malloc(sizeof (aie_ArcFileCons));
-    **list = (aie_ArcFileCons){ file, NULL };
-    return *list;
-  }
+  for(; (*list)->cdr != NULL; list = &(*list)->cdr);
+  *list = aie_malloc(sizeof (aie_ArcFileCons));
+  **list = (aie_ArcFileCons){ file, NULL };
 
-  return aie_arcfile_push(file, &(*list)->cdr);
+  return *list;
 }
 
 int aie_arcfile_list_destroy(aie_ArcFileCons** list)
