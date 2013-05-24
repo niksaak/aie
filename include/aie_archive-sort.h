@@ -13,8 +13,8 @@ typedef enum aie_ArcUnitSortBy {
   aie_SORTBY_UNIT_SIZE
 } aie_ArcUnitSortBy;
 
-void aie_arctable_sort(const aie_ArcUnitTable* table, aie_ArcUnitSortBy by,
-                       const aie_ArcUnit** buf, size_t size);
+size_t aie_arctable_sort(const aie_ArcUnitTable* table, aie_ArcUnitSortBy by,
+                         const aie_ArcUnit** buf, size_t size);
     // fill buf with pointers to units of table, no more than size and
     // in order specified by;
     // if size is zero, length of buff is assumed to be equal to table->unitc,
