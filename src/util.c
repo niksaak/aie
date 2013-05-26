@@ -125,7 +125,7 @@ int aie_ensure_dir(const char* pathname)
 char* strdup(const char* s)
 {
   char* string = aie_malloc(strlen(s) + 1);
-  AIE_ERETURN(NULL);
+  AIE_ONERROR(NULL);
   return strcpy(string, s);
 }
 

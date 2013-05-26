@@ -17,33 +17,11 @@
   aie_error(errno, aie_ELPanic, __func__, datum)
 
 
-#define AIE_WASSERT(assertion)                                    \
-  if(!(assertion))                                                \
-    aie_error(aie_EASSERT, aie_ELWarning, __func__, #assertion)
-
-#define AIE_ASSERT(assertion, ret)                                \
-  do {                                                            \
-    if(!(assertion)) {                                            \
-      aie_error(aie_EASSERT, aie_ELError, __func__, #assertion);  \
-      return ret;                                                 \
-    }                                                             \
-  } while(0)
-
-#define AIE_PASSERT(assertion, ret)                               \
-  do {                                                            \
-    if(!(assertion)) {                                            \
-      aie_error(aie_EASSERT, aie_ELPanic, __func__, #assertion);  \
-      return ret;                                                 \
-    }                                                             \
-  } while(0)
-
-
-#define AIE_ERETURN(val) \
-  if(aie_iserror())      \
-    return val
-
 #define AIE_ERESET() \
   aie_esuccess(__func__)
+
+#define AIE_ONERROR(ret) \
+  if(aie_iserror()) return ret
 
 
 #define AIE_WITH_ERROR_HOOK(var) \
@@ -60,11 +38,11 @@ typedef enum aie_Errno {
   aie_ENURUPO, // Null pointer error
   aie_EFORMAT, // Unrecognized format
   aie_EHEADER, // Bad header
-  aie_EOFFSET, // Bad offsets
+  aie_EOFFSET, // Bad offset
   aie_EINTEGRITY, // Questionable integrity
   aie_EENCRYPTION, // Encryption error
   aie_EINDEX, // Bad index
-  aie_EASSERT, // Assertion failed
+  aie_EENUM, // Bad enum
   aie_EUSR, // User error i.e. custom message
   aie_EUNKNOWN = -1 // Unknown error
 } aie_Errno;

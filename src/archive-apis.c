@@ -75,10 +75,16 @@ aie_Archive aie_arccreate(aie_ArcFile file, char** pathnames,
 int aie_arcextract(const aie_Archive* archive, const char* target,
     const char* opt)
 {
-  AIE_ERESET();
+  if(archive == NULL) {
+    AIE_ERROR(aie_ENURUPO, "archive");
+    return -1;
+  }
+  if(archive->fmt == NULL) {
+    AIE_ERROR(aie_ENURUPO, "archive format");
+    return -1;
+  }
 
-  AIE_ASSERT(archive != NULL, -1);
-  AIE_ASSERT(archive->fmt != NULL, -1);
+  AIE_ERESET();
 
   ASSERT_ENOWAY(archive->fmt->extract, archive->fmt->name, -1);
 

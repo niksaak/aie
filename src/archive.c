@@ -64,7 +64,7 @@ int aie_kmarchive(aie_Archive* archive)
     aie_kmarctable(archive->table);
   }
   if(archive->files != NULL) {
-    aie_arcfile_list_destroy(&archive->files);
+    aie_arcfile_delis(&archive->files);
   }
   *archive = aie_ARCNIL;
 
@@ -97,7 +97,7 @@ int aie_kmarctable(aie_ArcUnitTable* table)
   }
   for(int i = 0; i < table->unitc; i++) {
     free(table->unitv[i].name);
-    aie_arcsegment_list_destroy(&table->unitv[i].segments);
+    aie_arcsegment_delis(&table->unitv[i].segments);
   }
   free(table);
 
@@ -152,45 +152,42 @@ extern inline aie_ArcSegment aie_mkarcsegment(aie_ArcFile* file, size_t offset,
 
 extern inline int aie_kmarcsegment(aie_ArcSegment* segment);
 
-/*
-aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
-    aie_ArcSegmentCons** list)
+aie_ArcSegmentCons* aie_arcsegment_cons(aie_ArcSegment segment,
+    aie_ArcSegmentCons* list)
+{
+  aie_ArcSegmentCons* cons = malloc(sizeof *cons);
+  *cons = (aie_ArcSegmentCons){ segment, list };
+  return cons;
+}
+
+aie_ArcSegmentCons* aie_arcsegment_last(aie_ArcSegmentCons* list)
 {
   if(list == NULL) {
-    AIE_ERROR(aie_ENURUPO, "list");
+    AIE_WARNING(aie_ENURUPO, "list");
     return NULL;
   }
 
-  if(*list == NULL) {
-    *list = aie_malloc(sizeof (aie_ArcSegmentCons));
-    **list = (aie_ArcSegmentCons){ segment, NULL };
-    return *list;
-  }
-
-  return aie_arcsegment_push(segment, &(*list)->cdr);
+  for(list = NULL; list->cdr != NULL; list = list->cdr);
+  return list;
 }
-*/
 
 aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
-    aie_ArcSegmetnCons** list)
+    aie_ArcSegmentCons* list)
 {
   if(list == NULL) {
-    AIE_ERROR(aie_ENURUPO, "list");
-    return NULL;
+    AIE_WARNING(aie_ENURUPO, "list");
+    return aie_arcsegment_cons(segment, NULL);
   }
 
-  for(; list->cdr != NULL; list = &(*list)->cdr);
-  *list = aie_malloc(sizeof (aie_ArcSegmentCons));
-  **list = (aie_ArcSegmentCons){ segment, NULL };
-
-  return *list;
+  aie_arcsegment_last(list)->cdr = aie_arcsegment_cons(segment, NULL);
+  return list;
 }
 
-int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list)
+int aie_arcsegment_delis(aie_ArcSegmentCons** list)
 {
   if(list == NULL) {
     AIE_ERROR(aie_ENURUPO, "list");
-    return 1;
+    return -1;
   }
 
   if(*list == NULL) {
@@ -200,16 +197,7 @@ int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list)
   aie_ArcSegmentCons* cdr = (*list)->cdr;
   *list = aie_free(*list);
 
-  return aie_arcsegment_list_destroy(&cdr);
-}
-
-size_t aie_arcsegment_sumsize(aie_ArcSegmentCons* list)
-{
-  if(list == NULL) {
-    return 0;
-  }
-
-  return list->car.size + aie_arcsegment_sumsize(list->cdr);
+  return aie_arcsegment_delis(&cdr);
 }
 
 extern inline size_t aie_arcsegment_count(aie_ArcSegmentCons* list);
@@ -224,41 +212,35 @@ extern inline aie_ArcFile aie_mkarcfile(FILE* file, char* name, int role);
 
 extern inline int aie_kmarcfile(aie_ArcFile* file);
 
-/*
-aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
+aie_ArcFileCons* aie_arcfile_cons(aie_ArcFile file, aie_ArcFileCons* list)
 {
-  if(list == NULL) {
-    AIE_ERROR(aie_ENURUPO, "list");
-    return NULL;
-  }
-
-  file.name = strdup(file.name); // XXX: gah, leakage!
-  if(*list == NULL) {
-    *list = aie_malloc(sizeof (aie_ArcFileCons));
-    **list = (aie_ArcFileCons){ file, NULL };
-    return *list;
-  }
-
-  return aie_arcfile_push(file, &(*list)->cdr);
+  aie_ArcFileCons* cons = malloc(sizeof *cons);
+  *cons = (aie_ArcFileCons){ file, list };
+  return cons;
 }
-*/
 
-aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list)
+aie_ArcFileCons* aie_arcfile_last(aie_ArcFileCons* list)
+{
+  if(list == NULL) {
+    AIE_WARNING(aie_ENURUPO, "list");
+    return NULL;
+  }
+  for(; list->cdr != NULL; list = list->cdr);
+  return list;
+}
+
+aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons* list)
 {
   if(list == NULL) {
     AIE_ERROR(aie_ENURUPO, "list");
     return NULL;
   }
-
   file.name = strdup(file.name);
-  for(; (*list)->cdr != NULL; list = &(*list)->cdr);
-  *list = aie_malloc(sizeof (aie_ArcFileCons));
-  **list = (aie_ArcFileCons){ file, NULL };
-
-  return *list;
+  aie_arcfile_last(list)->cdr = aie_arcfile_cons(file, NULL);
+  return list;
 }
 
-int aie_arcfile_list_destroy(aie_ArcFileCons** list)
+int aie_arcfile_delis(aie_ArcFileCons** list)
 {
   if(list == NULL) {
     AIE_ERROR(aie_ENURUPO, "list");
@@ -273,6 +255,6 @@ int aie_arcfile_list_destroy(aie_ArcFileCons** list)
   free((*list)->car.name);
   *list = aie_free(*list);
 
-  return aie_arcfile_list_destroy(&cdr);
+  return aie_arcfile_delis(&cdr);
 }
 

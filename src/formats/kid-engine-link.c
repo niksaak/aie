@@ -40,7 +40,10 @@ typedef struct entry_r {
 
 static aie_Archive open(aie_ArcFile file, const char* opt)
 { // TODO: check archive integrity
-  AIE_ASSERT(file.stream != NULL, aie_ARCNIL);
+  if(file.stream == NULL) {
+    AIE_ERROR(aie_ENURUPO, "file.stream");
+    return aie_ARCNIL;
+  }
 
   header_t header = {{0}};
   aie_ArcFileCons* files = NULL;
@@ -60,7 +63,7 @@ static aie_Archive open(aie_ArcFile file, const char* opt)
   table = aie_mkarctable(0);
   arc_offset = header.fcount * sizeof (entry_t) + sizeof header;
 
-  aie_arcfile_push(file, &files);
+  files = aie_arcfile_push(file, files);
 
   for(int i = 0; i < header.fcount; i++) {
     entry_t entry;
@@ -75,8 +78,8 @@ static aie_Archive open(aie_ArcFile file, const char* opt)
     unit = (aie_ArcUnit){ entry.name, NULL,
                           entry.size2 / 2, entry.size2 / 2, 0 };
     segment = (aie_ArcSegment)
-              { &files->car, entry.offset + arc_offset, entry.size2 / 2 };
-    aie_arcsegment_push(segment, &unit.segments);
+              { &files->car, 0, entry.offset + arc_offset, entry.size2 / 2 };
+    unit.segments = aie_arcsegment_push(segment, unit.segments);
     aie_arctable_put(unit, &table);
   }
 

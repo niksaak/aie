@@ -91,6 +91,7 @@ char* aie_errstr(aie_Errno e)
     case aie_EINTEGRITY: return "Questionamble integrity";
     case aie_EENCRYPTION: return "Encryption";
     case aie_EINDEX: return "Bad index";
+    case aie_EENUM: return "Bad enum";
     case aie_EASSERT: return "Assertion failed";
     case aie_EUSR: return "User message";
     case aie_EUNKNOWN: return "Unknown error";

@@ -28,7 +28,7 @@ typedef enum aie_ArcFormatFeatures
 typedef struct aie_ArcSegment
 { // Represents segment of archived unit
   struct aie_ArcFile* file;     // file where segment starts
-  size_t offset;                // offset of segment, filewise
+  size_t offset;                // segment offset, filewise
   size_t size;                  // segment size
 } aie_ArcSegment;
 
@@ -273,15 +273,19 @@ inline int aie_kmarcsegment(aie_ArcSegment* segment)
   return 0;
 }
 
+aie_ArcSegmentCons* aie_arcsegment_cons(aie_ArcSegment segment,
+                                        aie_ArcSegmentCons* list);
+    // allocate, fill and return new cons
+
+aie_ArcSegmentCons* aie_arcsegment_last(aie_ArcSegmentCons* list);
+    // return last cons in the list
+
 aie_ArcSegmentCons* aie_arcsegment_push(aie_ArcSegment segment,
-                                        aie_ArcSegmentCons** list);
-    // push segment to list
+                                        aie_ArcSegmentCons* list);
+    // push segment to the tail of list, return list
 
-int aie_arcsegment_list_destroy(aie_ArcSegmentCons** list);
+int aie_arcsegment_delis(aie_ArcSegmentCons** list);
     // destroy segments list
-
-size_t aie_arcsegment_sumsize(aie_ArcSegmentCons* list);
-    // total size of segments in list
 
 inline size_t aie_arcsegment_count(aie_ArcSegmentCons* list)
 {  // count segments in list
@@ -305,9 +309,15 @@ inline int aie_kmarcfile(aie_ArcFile* file)
   return 0;
 }
 
-aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons** list);
-    // push file to list
+aie_ArcFileCons* aie_arcfile_cons(aie_ArcFile file, aie_ArcFileCons* list);
+    // allocate, fill and return new cons
 
-int aie_arcfile_list_destroy(aie_ArcFileCons** list);
+aie_ArcFileCons* aie_arcfile_last(aie_ArcFileCons* list);
+    // return last cons in the list
+
+aie_ArcFileCons* aie_arcfile_push(aie_ArcFile file, aie_ArcFileCons* list);
+    // push file to the end of list, returns list
+
+int aie_arcfile_delis(aie_ArcFileCons** list);
     // destroy file list
 
